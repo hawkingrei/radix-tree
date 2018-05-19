@@ -1,31 +1,54 @@
+extern crate crossbeam_epoch;
+extern crate crossbeam_utils;
+
+use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
+
 const RADIX_TREE_MAP_SHIFT: usize = 6;
 
-const NODE4: u8 = 1;
-const NODE16: u8 = 2;
-const NODE48: u8 = 3;
-const NODE256: u8 = 4;
-
-pub trait Node {}
-
-pub struct Node4<'a> {
-    key: [u8; 4],
-    value: [&'a Node; 4],
+enum node_type {
+    NODE4,
+    NODE16,
+    NODE48,
+    NODE256,
 }
 
-pub struct Node16<'a> {
-    key: [u8; 16],
-    value: [&'a Node; 16],
+struct Node<T: Send + 'static> {
+    inner: Atomic<T>,
+    keys: Vec<Atomic<Node<T>>>,
+    children: Vec<Atomic<Node<T>>>,
 }
 
-pub struct Node48<'a> {
-    key: [u8; 256],
-    value: [&'a Node; 48],
+/// A simple lock-free radix tree.
+pub struct Radix<T>
+where
+    T: 'static + Send + Sync,
+{
+    head: Atomic<Node<T>>,
 }
 
-pub struct Node256<'a> {
-    key: [u8; 256],
-    value: [&'a Node; 48],
-}
+//pub struct Node4<'a> {
+//    ntype: u8,
+//    key: [u8; 4],
+//    value: [&'a Node; 4],
+//}
+
+//pub struct Node16<'a> {
+//    ntype: u8,
+//    key: [u8; 16],
+//    value: [&'a Node; 16],
+//}
+
+//pub struct Node48<'a> {
+//    ntype: u8,
+//    key: [u8; 256],
+//    value: [&'a Node; 48],
+//}
+
+//pub struct Node256<'a> {
+//    ntype: u8,
+//    key: [u8; 256],
+//    value: [&'a Node; 48],
+//}
 
 #[cfg(test)]
 mod tests {
