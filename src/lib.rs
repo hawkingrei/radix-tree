@@ -4,12 +4,20 @@ extern crate crossbeam_utils;
 use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
 
 const RADIX_TREE_MAP_SHIFT: usize = 6;
+const MAX_PREFIX_LEN: usize = 6;
 
 enum node_type {
     NODE4,
     NODE16,
     NODE48,
     NODE256,
+}
+
+struct node_header {
+    node_type: node_type,
+    num_children: u8,
+    partial: [u8; MAX_PREFIX_LEN],
+    partial_len: usize,
 }
 
 struct Node<T: Send + 'static> {
