@@ -17,14 +17,14 @@ pub trait ArtKey {
     fn bytes(&self) -> &[u8];
 }
 
-struct node_header {
+pub struct node_header {
     node_type: node_type,
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
 }
 
-struct Node<K, T>
+pub struct Node<K, T>
 where
     K: ArtKey + Send + 'static,
     T: 'static + Send + Sync,
@@ -43,6 +43,41 @@ where
 {
     head: Atomic<Node<K, T>>,
     size: usize,
+}
+
+pub trait ArtNodeTrait<K, V>
+where
+    K: ArtKey + Send + 'static,
+    V: 'static + Send + Sync,
+{
+    fn add_child(&mut self, node: Node<K, V>, byte: u8);
+
+    fn clean_child(&mut self, byte: u8) -> bool;
+
+    #[inline]
+    fn is_full(&self) -> bool;
+
+    fn grow_and_add(self, leaf: Node<K, V>, byte: u8) -> Node<K, V>;
+
+    fn shrink(self) -> Node<K, V>;
+
+    #[inline]
+    fn mut_header(&mut self) -> &mut node_header;
+
+    #[inline]
+    fn header(&self) -> &node_header;
+
+    #[inline]
+    fn find_child_mut(&mut self, byte: u8) -> &mut Node<K, V>;
+
+    #[inline]
+    fn find_child(&self, byte: u8) -> Option<&Node<K, V>>;
+
+    #[inline]
+    fn has_child(&self, byte: u8) -> bool;
+
+    #[inline]
+    fn to_art_node(self: Box<Self>) -> Node<K, V>;
 }
 
 //pub struct Node4<'a> {
