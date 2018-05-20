@@ -13,6 +13,10 @@ enum node_type {
     NODE256,
 }
 
+pub trait ArtKey {
+    fn bytes(&self) -> &[u8];
+}
+
 struct node_header {
     node_type: node_type,
     num_children: u8,
@@ -20,18 +24,25 @@ struct node_header {
     partial_len: usize,
 }
 
-struct Node<T: Send + 'static> {
-    inner: Atomic<T>,
-    keys: Vec<Atomic<Node<T>>>,
-    children: Vec<Atomic<Node<T>>>,
+struct Node<K, T>
+where
+    K: ArtKey + Send + 'static,
+    T: 'static + Send + Sync,
+{
+    inner: Atomic<K>,
+    header: node_header,
+    keys: Vec<Atomic<Node<K, T>>>,
+    children: Vec<Atomic<Node<K, T>>>,
 }
 
 /// A simple lock-free radix tree.
-pub struct Radix<T>
+pub struct Radix<K, T>
 where
+    K: ArtKey + Send + 'static,
     T: 'static + Send + Sync,
 {
-    head: Atomic<Node<T>>,
+    head: Atomic<Node<K, T>>,
+    size: usize,
 }
 
 //pub struct Node4<'a> {
