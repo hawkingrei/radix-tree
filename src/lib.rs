@@ -120,30 +120,6 @@ where
     fn to_art_node(self: Box<Self>) -> ArtNode<K, V>;
 }
 
-//pub struct Node4<'a> {
-//    ntype: u8,
-//    key: [u8; 4],
-//    value: [&'a Node; 4],
-//}
-
-//pub struct Node16<'a> {
-//    ntype: u8,
-//    key: [u8; 16],
-//    value: [&'a Node; 16],
-//}
-
-//pub struct Node48<'a> {
-//    ntype: u8,
-//    key: [u8; 256],
-//    value: [&'a Node; 48],
-//}
-
-//pub struct Node256<'a> {
-//    ntype: u8,
-//    key: [u8; 256],
-//    value: [&'a Node; 48],
-//}
-
 #[cfg(test)]
 mod tests {
     #[test]
