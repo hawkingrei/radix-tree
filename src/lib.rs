@@ -1,11 +1,62 @@
+#![feature(fixed_size_array)]
 extern crate crossbeam_epoch;
 extern crate crossbeam_utils;
 
 use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
 use std::marker::PhantomData;
+use std::{mem, ptr};
 
 const RADIX_TREE_MAP_SHIFT: usize = 6;
 const MAX_PREFIX_LEN: usize = 6;
+const EMPTY_CELL: u8 = 0;
+
+pub const SMALL_STRUCT: usize = 8;
+type Small = [u8; SMALL_STRUCT];
+
+macro_rules! rep_no_copy {
+    ($t:ty ;$e:expr; $n:expr) => {{
+        let mut v:[$t;$n]  = unsafe { mem::uninitialized() };
+        for i in 0..$n {
+            v[i] = $e;
+        }
+        v
+    }};
+}
+
+pub struct SmallStruct<T> {
+    storage: Small,
+    marker: PhantomData<T>,
+}
+
+impl<T> SmallStruct<T> {
+    pub fn new(elem: T) -> Self {
+        unsafe {
+            let mut ret = SmallStruct {
+                storage: mem::uninitialized(),
+                marker: PhantomData,
+            };
+            std::ptr::copy_nonoverlapping(
+                &elem as *const T as *const u8,
+                ret.storage.as_mut_ptr(),
+                mem::size_of::<T>(),
+            );
+            ret
+        }
+    }
+
+    pub fn reference(&self) -> &T {
+        unsafe { &*(self.storage.as_ptr() as *const T) }
+    }
+
+    pub fn own(self) -> T {
+        unsafe {
+            let mut ret = mem::uninitialized();
+            let dst = &mut ret as *mut T as *mut u8;
+            std::ptr::copy_nonoverlapping(self.storage.as_ptr(), dst, mem::size_of::<T>());
+            ret
+        }
+    }
+}
 
 enum node_type {
     NODE4,
@@ -35,10 +86,29 @@ pub trait ArtKey {
 }
 
 pub struct node_header {
-    node_type: node_type,
+    //node_type: node_type,
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
+}
+
+impl node_header {
+    pub fn new() -> Self {
+        node_header {
+            num_children: 0,
+            partial_len: 0,
+            partial: unsafe { mem::uninitialized() },
+        }
+    }
+
+    pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
+        for i in 0..self.partial_len {
+            if key.bytes()[i + depth] != self.partial[i] {
+                return i;
+            }
+        }
+        self.partial_len
+    }
 }
 
 pub struct Node4<K, T>
@@ -73,7 +143,7 @@ where
     T: 'static + Send + Sync,
 {
     header: node_header,
-    children: [Atomic<ArtNode<K, T>>; 48],
+    children: [Atomic<ArtNode<K, T>>; 256],
 }
 
 /// A simple lock-free radix tree.
@@ -118,6 +188,90 @@ where
 
     #[inline]
     fn to_art_node(self: Box<Self>) -> ArtNode<K, V>;
+}
+
+impl<K, V> Node4<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    pub fn new() -> Self {
+        Node4 {
+            header: node_header::new(),
+            keys: unsafe { mem::uninitialized() },
+            children: unsafe { mem::uninitialized() },
+        }
+    }
+}
+
+impl<K, V> Drop for Node4<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    fn drop(&mut self) {
+        for i in 0..self.header.num_children {
+            drop(&mut self.children[i as usize]);
+        }
+    }
+}
+
+impl<K, V> Node16<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    pub fn new() -> Self {
+        Node16 {
+            header: node_header::new(),
+            keys: unsafe { mem::uninitialized() },
+            children: unsafe { mem::uninitialized() },
+        }
+    }
+}
+
+impl<K, V> Drop for Node16<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    fn drop(&mut self) {
+        for i in 0..self.header.num_children {
+            drop(&mut self.children[i as usize]);
+        }
+    }
+}
+
+impl<K, V> Node48<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    pub fn new() -> Self {
+        Node48 {
+            header: node_header::new(),
+            keys: rep_no_copy!(Atomic<K>; Atomic::null(); 256),
+            children: unsafe { mem::uninitialized() },
+        }
+    }
+}
+
+impl<K, V> Drop for Node48<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    fn drop(&mut self) {
+        for i in 0..self.header.num_children {
+            drop(&mut self.children[i as usize]);
+        }
+    }
+}
+
+impl<K, V> Node256<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    pub fn new() -> Self {
+        Node256 {
+            header: node_header::new(),
+            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 256),
+        }
+    }
 }
 
 #[cfg(test)]
