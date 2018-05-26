@@ -58,7 +58,7 @@ impl<T> SmallStruct<T> {
     }
 }
 
-enum node_type {
+enum NodeType {
     NODE4,
     NODE16,
     NODE48,
@@ -85,16 +85,16 @@ pub trait ArtKey {
     fn bytes(&self) -> &[u8];
 }
 
-pub struct node_header {
-    //node_type: node_type,
+pub struct NodeHeader {
+    //NodeType: NodeType,
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
 }
 
-impl node_header {
+impl NodeHeader {
     pub fn new() -> Self {
-        node_header {
+        NodeHeader {
             num_children: 0,
             partial_len: 0,
             partial: unsafe { mem::uninitialized() },
@@ -115,7 +115,7 @@ pub struct Node4<K, T>
 where
     T: 'static + Send + Sync,
 {
-    header: node_header,
+    header: NodeHeader,
     keys: [Atomic<K>; 4],
     children: [Atomic<ArtNode<K, T>>; 4],
 }
@@ -124,7 +124,7 @@ pub struct Node16<K, T>
 where
     T: 'static + Send + Sync,
 {
-    header: node_header,
+    header: NodeHeader,
     keys: [Atomic<K>; 16],
     children: [Atomic<ArtNode<K, T>>; 16],
 }
@@ -133,7 +133,7 @@ pub struct Node48<K, T>
 where
     T: 'static + Send + Sync,
 {
-    header: node_header,
+    header: NodeHeader,
     keys: [Atomic<K>; 256],
     children: [Atomic<ArtNode<K, T>>; 48],
 }
@@ -142,7 +142,7 @@ pub struct Node256<K, T>
 where
     T: 'static + Send + Sync,
 {
-    header: node_header,
+    header: NodeHeader,
     children: [Atomic<ArtNode<K, T>>; 256],
 }
 
@@ -172,10 +172,10 @@ where
     fn shrink(self) -> ArtNode<K, V>;
 
     #[inline]
-    fn mut_header(&mut self) -> &mut node_header;
+    fn mut_header(&mut self) -> &mut NodeHeader;
 
     #[inline]
-    fn header(&self) -> &node_header;
+    fn header(&self) -> &NodeHeader;
 
     #[inline]
     fn find_child_mut(&mut self, byte: u8) -> &mut ArtNode<K, V>;
@@ -196,7 +196,7 @@ where
 {
     pub fn new() -> Self {
         Node4 {
-            header: node_header::new(),
+            header: NodeHeader::new(),
             keys: unsafe { mem::uninitialized() },
             children: unsafe { mem::uninitialized() },
         }
@@ -220,7 +220,7 @@ where
 {
     pub fn new() -> Self {
         Node16 {
-            header: node_header::new(),
+            header: NodeHeader::new(),
             keys: unsafe { mem::uninitialized() },
             children: unsafe { mem::uninitialized() },
         }
@@ -244,7 +244,7 @@ where
 {
     pub fn new() -> Self {
         Node48 {
-            header: node_header::new(),
+            header: NodeHeader::new(),
             keys: rep_no_copy!(Atomic<K>; Atomic::null(); 256),
             children: unsafe { mem::uninitialized() },
         }
@@ -268,7 +268,7 @@ where
 {
     pub fn new() -> Self {
         Node256 {
-            header: node_header::new(),
+            header: NodeHeader::new(),
             children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 256),
         }
     }
