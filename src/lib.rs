@@ -85,26 +85,6 @@ pub trait ArtKey {
     fn bytes(&self) -> &[u8];
 }
 
-pub struct ArtTree<K: ArtKey, V>
-where
-    V: 'static + Send + Sync,
-{
-    root: Atomic<ArtNode<K, V>>,
-    size: usize,
-}
-
-impl<K: ArtKey, V> Default for ArtTree<K, V>
-where
-    V: 'static + Send + Sync,
-{
-    fn default() -> Self {
-        ArtTree {
-            root: Atomic::null(),
-            size: 0,
-        }
-    }
-}
-
 pub struct NodeHeader {
     //NodeType: NodeType,
     num_children: u8,
@@ -167,13 +147,27 @@ where
 }
 
 /// A simple lock-free radix tree.
-pub struct Radix<'a, K: 'a, T: 'a>
+pub struct Radix<'a, K: 'a + ArtKey, T: 'a>
 where
     T: 'static + Send + Sync,
 {
     head: Atomic<ArtNode<K, T>>,
     size: usize,
     phantom: PhantomData<&'a K>,
+}
+
+impl<'a, K: ArtKey, T> Default for Radix<'a, K, T>
+where
+    K: 'a + ArtKey,
+    T: 'static + Send + Sync,
+{
+    fn default() -> Self {
+        Radix {
+            head: Atomic::null(),
+            size: 0,
+            phantom: Default::default(),
+        }
+    }
 }
 
 trait ArtNodeTrait<K, V>
