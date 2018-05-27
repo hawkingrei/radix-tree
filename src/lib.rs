@@ -236,11 +236,11 @@ where
     }
 }
 
-impl<K, V> Node16<K, V>
+impl<K, V> ArtNodeTrait<K, V> for Node16<K, V>
 where
     V: 'static + Send + Sync,
 {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Node16 {
             header: NodeHeader::new(),
             keys: unsafe { mem::uninitialized() },
@@ -260,11 +260,11 @@ where
     }
 }
 
-impl<K, V> Node48<K, V>
+impl<K, V> ArtNodeTrait<K, V> for Node48<K, V>
 where
     V: 'static + Send + Sync,
 {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Node48 {
             header: NodeHeader::new(),
             keys: rep_no_copy!(Atomic<K>; Atomic::null(); 256),
@@ -284,11 +284,11 @@ where
     }
 }
 
-impl<K, V> Node256<K, V>
+impl<K, V> ArtNodeTrait<K, V> for Node256<K, V>
 where
     V: 'static + Send + Sync,
 {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Node256 {
             header: NodeHeader::new(),
             children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 256),
