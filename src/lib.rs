@@ -89,8 +89,20 @@ pub struct ArtTree<K: ArtKey, V>
 where
     V: 'static + Send + Sync,
 {
-    root: ArtNode<K, V>,
+    root: Atomic<ArtNode<K, V>>,
     size: usize,
+}
+
+impl<K: ArtKey, V> Default for ArtTree<K, V>
+where
+    V: 'static + Send + Sync,
+{
+    fn default() -> Self {
+        ArtTree {
+            root: Atomic::null(),
+            size: 0,
+        }
+    }
 }
 
 pub struct NodeHeader {
@@ -168,37 +180,39 @@ pub trait ArtNodeTrait<K, V>
 where
     V: 'static + Send + Sync,
 {
-    fn add_child(&mut self, node: ArtNode<K, V>, byte: u8);
+    fn new() -> Self;
 
-    fn clean_child(&mut self, byte: u8) -> bool;
+    //fn add_child(&mut self, node: ArtNode<K, V>, byte: u8);
 
-    #[inline]
-    fn is_full(&self) -> bool;
+    //fn clean_child(&mut self, byte: u8) -> bool;
 
-    fn grow_and_add(self, leaf: ArtNode<K, V>, byte: u8) -> ArtNode<K, V>;
+    //#[inline]
+    //fn is_full(&self) -> bool;
 
-    fn shrink(self) -> ArtNode<K, V>;
+    //fn grow_and_add(self, leaf: ArtNode<K, V>, byte: u8) -> ArtNode<K, V>;
 
-    #[inline]
-    fn mut_header(&mut self) -> &mut NodeHeader;
+    //fn shrink(self) -> ArtNode<K, V>;
 
-    #[inline]
-    fn header(&self) -> &NodeHeader;
+    //#[inline]
+    //fn mut_header(&mut self) -> &mut NodeHeader;
 
-    #[inline]
-    fn find_child_mut(&mut self, byte: u8) -> &mut ArtNode<K, V>;
+    //#[inline]
+    //fn header(&self) -> &NodeHeader;
 
-    #[inline]
-    fn find_child(&self, byte: u8) -> Option<&ArtNode<K, V>>;
+    //#[inline]
+    //fn find_child_mut(&mut self, byte: u8) -> &mut ArtNode<K, V>;
 
-    #[inline]
-    fn has_child(&self, byte: u8) -> bool;
+    //#[inline]
+    //fn find_child(&self, byte: u8) -> Option<&ArtNode<K, V>>;
 
-    #[inline]
-    fn to_art_node(self: Box<Self>) -> ArtNode<K, V>;
+    //#[inline]
+    //fn has_child(&self, byte: u8) -> bool;
+
+    //#[inline]
+    //fn to_art_node(self: Box<Self>) -> ArtNode<K, V>;
 }
 
-impl<K, V> Node4<K, V>
+impl<K, V> ArtNodeTrait<K, V> for Node4<K, V>
 where
     V: 'static + Send + Sync,
 {
