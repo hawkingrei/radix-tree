@@ -85,6 +85,14 @@ pub trait ArtKey {
     fn bytes(&self) -> &[u8];
 }
 
+pub struct ArtTree<K: ArtKey, V>
+where
+    V: 'static + Send + Sync,
+{
+    root: ArtNode<K, V>,
+    size: usize,
+}
+
 pub struct NodeHeader {
     //NodeType: NodeType,
     num_children: u8,
