@@ -176,7 +176,7 @@ where
     phantom: PhantomData<&'a K>,
 }
 
-pub trait ArtNodeTrait<K, V>
+trait ArtNodeTrait<K, V>
 where
     V: 'static + Send + Sync,
 {
@@ -216,7 +216,7 @@ impl<K, V> ArtNodeTrait<K, V> for Node4<K, V>
 where
     V: 'static + Send + Sync,
 {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Node4 {
             header: NodeHeader::new(),
             keys: unsafe { mem::uninitialized() },
