@@ -213,7 +213,7 @@ where
     fn new() -> Self {
         Node4 {
             header: NodeHeader::new(),
-            keys: unsafe { mem::uninitialized() },
+            keys: rep_no_copy!(Atomic<K>; Atomic::null(); 4),
             children: unsafe { mem::uninitialized() },
         }
     }
@@ -237,7 +237,7 @@ where
     fn new() -> Self {
         Node16 {
             header: NodeHeader::new(),
-            keys: unsafe { mem::uninitialized() },
+            keys: rep_no_copy!(Atomic<K>; Atomic::null(); 16),
             children: unsafe { mem::uninitialized() },
         }
     }
