@@ -214,7 +214,7 @@ where
         Node4 {
             header: NodeHeader::new(),
             keys: rep_no_copy!(Atomic<K>; Atomic::null(); 4),
-            children: unsafe { mem::uninitialized() },
+            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 4),
         }
     }
 }
@@ -238,7 +238,7 @@ where
         Node16 {
             header: NodeHeader::new(),
             keys: rep_no_copy!(Atomic<K>; Atomic::null(); 16),
-            children: unsafe { mem::uninitialized() },
+            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 16),
         }
     }
 }
@@ -262,7 +262,7 @@ where
         Node48 {
             header: NodeHeader::new(),
             keys: rep_no_copy!(Atomic<K>; Atomic::null(); 256),
-            children: unsafe { mem::uninitialized() },
+            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 48),
         }
     }
 }
