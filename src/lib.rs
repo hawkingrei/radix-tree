@@ -87,7 +87,7 @@ pub trait ArtKey {
 
 pub struct NodeHeader {
     //NodeType: NodeType,
-    version: u64,
+    version: Atomic<u64>,
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
