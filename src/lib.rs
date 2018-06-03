@@ -96,6 +96,7 @@ pub struct NodeHeader {
 impl NodeHeader {
     pub fn new() -> Self {
         NodeHeader {
+            version: Atomic::new(0),
             num_children: 0,
             partial_len: 0,
             partial: unsafe { mem::uninitialized() },
@@ -117,8 +118,9 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: [Atomic<K>; 4],
-    children: [Atomic<ArtNode<K, T>>; 4],
+    keys: [K; 4],
+    children: [ArtNode<K, T>; 4],
+    marker: PhantomData<T>,
 }
 
 pub struct Node16<K, T>
@@ -126,8 +128,9 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: [Atomic<K>; 16],
-    children: [Atomic<ArtNode<K, T>>; 16],
+    keys: [K; 16],
+    children: [ArtNode<K, T>; 16],
+    marker: PhantomData<T>,
 }
 
 pub struct Node48<K, T>
@@ -135,8 +138,9 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: [Atomic<K>; 256],
-    children: [Atomic<ArtNode<K, T>>; 48],
+    keys: [K; 256],
+    children: [ArtNode<K, T>; 48],
+    marker: PhantomData<T>,
 }
 
 pub struct Node256<K, T>
@@ -144,15 +148,16 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    children: [Atomic<ArtNode<K, T>>; 256],
+    children: [ArtNode<K, T>; 256],
+    marker: PhantomData<T>,
 }
 
 /// A simple lock-free radix tree.
-pub struct Radix<'a, K: 'a + ArtKey, T: 'a>
+pub struct Radix<'a, K: 'a + ArtKey, V: 'a>
 where
-    T: 'static + Send + Sync,
+    V: 'static + Send + Sync,
 {
-    head: Atomic<ArtNode<K, T>>,
+    head: ArtNode<K, V>,
     size: usize,
     phantom: PhantomData<&'a K>,
 }
@@ -164,7 +169,7 @@ where
 {
     fn default() -> Self {
         Radix {
-            head: Atomic::null(),
+            head: ArtNode::Empty,
             size: 0,
             phantom: Default::default(),
         }
@@ -209,13 +214,15 @@ where
 
 impl<K, V> ArtNodeTrait<K, V> for Node4<K, V>
 where
+    K: Default,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
         Node4 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(Atomic<K>; Atomic::null(); 4),
-            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 4),
+            keys: rep_no_copy!(K; Default::default(); 4),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 4),
+            marker: Default::default(),
         }
     }
 }
@@ -233,13 +240,15 @@ where
 
 impl<K, V> ArtNodeTrait<K, V> for Node16<K, V>
 where
+    K: Default,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
         Node16 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(Atomic<K>; Atomic::null(); 16),
-            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 16),
+            keys: rep_no_copy!(K; Default::default(); 16),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16),
+            marker: Default::default(),
         }
     }
 }
@@ -257,13 +266,15 @@ where
 
 impl<K, V> ArtNodeTrait<K, V> for Node48<K, V>
 where
+    K: Default,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
         Node48 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(Atomic<K>; Atomic::null(); 256),
-            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 48),
+            keys: rep_no_copy!(K; Default::default(); 256),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48),
+            marker: Default::default(),
         }
     }
 }
@@ -286,7 +297,8 @@ where
     fn new() -> Self {
         Node256 {
             header: NodeHeader::new(),
-            children: rep_no_copy!(Atomic<ArtNode<K, V>>; Atomic::null(); 256),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
+            marker: Default::default(),
         }
     }
 }
