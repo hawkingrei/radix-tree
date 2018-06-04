@@ -178,6 +178,21 @@ where
     }
 }
 
+impl<'a, K: ArtKey, T> Radix<'a, K, T>
+where
+    K: 'a + ArtKey,
+    T: 'static + Send + Sync,
+{
+    fn new(level: usize) -> Self {
+        Radix {
+            head: ArtNode::Empty,
+            level: level,
+            size: 0,
+            phantom: Default::default(),
+        }
+    }
+}
+
 trait ArtNodeTrait<K, V>
 where
     V: 'static + Send + Sync,
