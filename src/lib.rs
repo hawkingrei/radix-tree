@@ -159,6 +159,7 @@ where
 {
     head: ArtNode<K, V>,
     size: usize,
+    level: usize,
     phantom: PhantomData<&'a K>,
 }
 
@@ -170,6 +171,7 @@ where
     fn default() -> Self {
         Radix {
             head: ArtNode::Empty,
+            level: 0,
             size: 0,
             phantom: Default::default(),
         }
