@@ -6,6 +6,11 @@ use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
 use std::marker::PhantomData;
 use std::{mem, ptr};
 
+const N4: u8 = 0;
+const N16: u8 = 1;
+const N48: u8 = 2;
+const N256: u8 = 3;
+
 const RADIX_TREE_MAP_SHIFT: usize = 6;
 const MAX_PREFIX_LEN: usize = 6;
 const EMPTY_CELL: u8 = 0;
@@ -21,41 +26,6 @@ macro_rules! rep_no_copy {
         }
         v
     }};
-}
-
-pub struct SmallStruct<T> {
-    storage: Small,
-    marker: PhantomData<T>,
-}
-
-impl<T> SmallStruct<T> {
-    pub fn new(elem: T) -> Self {
-        unsafe {
-            let mut ret = SmallStruct {
-                storage: mem::uninitialized(),
-                marker: PhantomData,
-            };
-            std::ptr::copy_nonoverlapping(
-                &elem as *const T as *const u8,
-                ret.storage.as_mut_ptr(),
-                mem::size_of::<T>(),
-            );
-            ret
-        }
-    }
-
-    pub fn reference(&self) -> &T {
-        unsafe { &*(self.storage.as_ptr() as *const T) }
-    }
-
-    pub fn own(self) -> T {
-        unsafe {
-            let mut ret = mem::uninitialized();
-            let dst = &mut ret as *mut T as *mut u8;
-            std::ptr::copy_nonoverlapping(self.storage.as_ptr(), dst, mem::size_of::<T>());
-            ret
-        }
-    }
 }
 
 enum NodeType {
