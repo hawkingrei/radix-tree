@@ -4,12 +4,8 @@ extern crate crossbeam_utils;
 
 use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
 use std::marker::PhantomData;
+use std::sync::atomic::Ordering;
 use std::{mem, ptr};
-
-const N4: u8 = 0;
-const N16: u8 = 1;
-const N48: u8 = 2;
-const N256: u8 = 3;
 
 const RADIX_TREE_MAP_SHIFT: usize = 6;
 const MAX_PREFIX_LEN: usize = 6;
@@ -57,7 +53,7 @@ pub trait ArtKey {
 
 pub struct NodeHeader {
     //NodeType: NodeType,
-    version: Atomic<u64>,
+    version: Atomic<Owned<u64>>, // unlock 0, lock 1
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
@@ -66,11 +62,16 @@ pub struct NodeHeader {
 impl NodeHeader {
     pub fn new() -> Self {
         NodeHeader {
-            version: Atomic::new(0),
+            version: Atomic::new(Owned::new(0).with_tag(0)),
             num_children: 0,
             partial_len: 0,
             partial: unsafe { mem::uninitialized() },
         }
+    }
+
+    #[inline(always)]
+    pub fn is_locked(self, g: &Guard) -> bool {
+        self.version.load(Ordering::SeqCst, g).tag() == 1
     }
 
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
