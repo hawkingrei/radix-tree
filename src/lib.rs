@@ -3,6 +3,7 @@ extern crate crossbeam_epoch;
 extern crate crossbeam_utils;
 
 use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
+use std::arch::x86_64::_mm_pause;
 use std::marker::PhantomData;
 use std::sync::atomic::Ordering;
 use std::{mem, ptr};
@@ -53,25 +54,55 @@ pub trait ArtKey {
 
 pub struct NodeHeader {
     //NodeType: NodeType,
-    version: Atomic<Owned<u64>>, // unlock 0, lock 1
+    version: Atomic<u64>, // unlock 0, lock 1
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
 }
 
+pub fn is_locked(version: &Atomic<u64>, g: &Guard) -> bool {
+    version.load(Ordering::SeqCst, &g).tag() & 0b10 == 0b10
+}
+
+pub fn is_obsolete(version: &Atomic<u64>, g: &Guard) -> bool {
+    version.load(Ordering::SeqCst, &g).tag() & 1 == 1
+}
+
 impl NodeHeader {
     pub fn new() -> Self {
         NodeHeader {
-            version: Atomic::new(Owned::new(0).with_tag(0)),
+            version: Atomic::new(0),
             num_children: 0,
             partial_len: 0,
             partial: unsafe { mem::uninitialized() },
         }
     }
 
-    #[inline(always)]
-    pub fn is_locked(self, g: &Guard) -> bool {
-        self.version.load(Ordering::SeqCst, g).tag() == 1
+    pub fn writeLockOrRestart(&self, g: &Guard) -> bool {
+        loop {
+            let mut ver = self.version.load(Ordering::SeqCst, g);
+            while is_locked(&self.version, g) {
+                unsafe {
+                    _mm_pause();
+                    ver = self.version.load(Ordering::SeqCst, g);
+                }
+            }
+
+            if is_obsolete(&self.version, g) {
+                return true;
+            }
+
+            match self.version.compare_and_set(
+                ver,
+                Owned::new(ver.as_raw() as u64 + 1).with_tag(ver.tag()),
+                Ordering::SeqCst,
+                g,
+            ) {
+                Ok(_) => break,
+                Err(_) => continue,
+            }
+        }
+        false
     }
 
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
