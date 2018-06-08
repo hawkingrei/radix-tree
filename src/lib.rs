@@ -78,7 +78,7 @@ impl NodeHeader {
         }
     }
 
-    pub fn writeLockOrRestart(&self, g: &Guard) -> bool {
+    pub fn write_lock_or_restart(&self, g: &Guard) -> bool {
         loop {
             let mut ver = self.version.load(Ordering::SeqCst, g);
             while is_locked(&self.version, g) {
