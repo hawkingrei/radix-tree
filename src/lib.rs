@@ -70,8 +70,10 @@ pub fn is_obsolete(version: &Atomic<u64>, g: &Guard) -> bool {
 
 impl NodeHeader {
     pub fn new() -> Self {
+        let ver: Atomic<u64> = Atomic::new(0);
+        ver.store(Owned::new(0).with_tag(0), Ordering::SeqCst);
         NodeHeader {
-            version: Atomic::new(0),
+            version: ver,
             num_children: 0,
             partial_len: 0,
             partial: unsafe { mem::uninitialized() },
