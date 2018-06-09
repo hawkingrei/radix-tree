@@ -1,7 +1,7 @@
 [package]
 name = "radix-tree"
 version = "0.1.0"
-authors = ["真人 <weizhen.wang@duitang.com>"]
+authors = ["hawking.rei <hawking.rei@gmail.com>"]
 
 [dependencies]
 crossbeam-epoch = "0.4.1"
