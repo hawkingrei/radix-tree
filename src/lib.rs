@@ -89,12 +89,12 @@ pub struct NodeHeader {
     partial_len: usize,
 }
 
-pub fn is_locked(version: &Arc<AtomicUsize>, g: &Guard) -> bool {
+pub fn is_locked(version: &Arc<AtomicUsize>) -> bool {
     let (_, tag) = decompose_data::<u64>(version.load(Ordering::SeqCst));
     tag & 0b10 == 0b10
 }
 
-pub fn is_obsolete(version: &Arc<AtomicUsize>, g: &Guard) -> bool {
+pub fn is_obsolete(version: &Arc<AtomicUsize>) -> bool {
     let (_, tag) = decompose_data::<u64>(version.load(Ordering::SeqCst));
     tag & 1 == 1
 }
@@ -109,17 +109,17 @@ impl NodeHeader {
         }
     }
 
-    pub fn write_lock_or_restart(&self, g: &Guard) -> bool {
+    pub fn write_lock_or_restart(&self) -> bool {
         loop {
             let mut ver = self.version.load(Ordering::SeqCst);
-            while is_locked(&self.version, g) {
+            while is_locked(&self.version) {
                 unsafe {
                     _mm_pause();
                     ver = self.version.load(Ordering::SeqCst);
                 }
             }
 
-            if is_obsolete(&self.version, g) {
+            if is_obsolete(&self.version) {
                 return true;
             }
 
@@ -134,6 +134,25 @@ impl NodeHeader {
             }
         }
         false
+    }
+
+    pub fn lock_version_or_restart(&self) -> bool {
+        if is_obsolete(&self.version) || is_obsolete(&self.version) {
+            return true;
+        }
+        let ver = self.version.load(Ordering::SeqCst);
+        match self
+            .version
+            .compare_exchange(ver, ver + 1, Ordering::SeqCst, Ordering::Relaxed)
+        {
+            Ok(_) => {
+                let ver = self.version.load(Ordering::SeqCst);
+                self.version
+                    .store(data_with_tag::<u64>(ver, 0b10), Ordering::SeqCst);
+            }
+            Err(_) => return true,
+        }
+        return false;
     }
 
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
