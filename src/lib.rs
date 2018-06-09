@@ -155,6 +155,12 @@ impl NodeHeader {
         return false;
     }
 
+    pub fn write_unlock(&self) {
+        let ver = self.version.load(Ordering::SeqCst);
+        self.version
+            .store(data_with_tag::<u64>(ver, 0b0), Ordering::SeqCst);
+    }
+
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
         for i in 0..self.partial_len {
             if key.bytes()[i + depth] != self.partial[i] {
