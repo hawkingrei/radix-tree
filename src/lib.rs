@@ -5,7 +5,8 @@ extern crate crossbeam_utils;
 use crossbeam_epoch::{pin, unprotected, Atomic, Guard, Owned, Shared};
 use std::arch::x86_64::_mm_pause;
 use std::marker::PhantomData;
-use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
 use std::{mem, ptr};
 
 const RADIX_TREE_MAP_SHIFT: usize = 6;
@@ -23,6 +24,34 @@ macro_rules! rep_no_copy {
         }
         v
     }};
+}
+
+/// Panics if the pointer is not properly unaligned.
+#[inline]
+fn ensure_aligned<T>(raw: *const T) {
+    assert_eq!(raw as usize & low_bits::<T>(), 0, "unaligned pointer");
+}
+
+/// Returns a bitmask containing the unused least significant bits of an aligned pointer to `T`.
+#[inline]
+fn low_bits<T>() -> usize {
+    (1 << mem::align_of::<T>().trailing_zeros()) - 1
+}
+
+/// Given a tagged pointer `data`, returns the same pointer, but tagged with `tag`.
+///
+/// `tag` is truncated to fit into the unused bits of the pointer to `T`.
+#[inline]
+fn data_with_tag<T>(data: usize, tag: usize) -> usize {
+    (data & !low_bits::<T>()) | (tag & low_bits::<T>())
+}
+
+/// Decomposes a tagged pointer `data` into the pointer and the tag.
+#[inline]
+fn decompose_data<T>(data: usize) -> (*mut T, usize) {
+    let raw = (data & !low_bits::<T>()) as *mut T;
+    let tag = data & low_bits::<T>();
+    (raw, tag)
 }
 
 enum NodeType {
@@ -54,26 +83,26 @@ pub trait ArtKey {
 
 pub struct NodeHeader {
     //NodeType: NodeType,
-    version: Atomic<u64>, // unlock 0, lock 1
+    version: Arc<AtomicUsize>, // unlock 0, lock 1
     num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
 }
 
-pub fn is_locked(version: &Atomic<u64>, g: &Guard) -> bool {
-    version.load(Ordering::SeqCst, &g).tag() & 0b10 == 0b10
+pub fn is_locked(version: &Arc<AtomicUsize>, g: &Guard) -> bool {
+    let (_, tag) = decompose_data::<u64>(version.load(Ordering::SeqCst));
+    tag & 0b10 == 0b10
 }
 
-pub fn is_obsolete(version: &Atomic<u64>, g: &Guard) -> bool {
-    version.load(Ordering::SeqCst, &g).tag() & 1 == 1
+pub fn is_obsolete(version: &Arc<AtomicUsize>, g: &Guard) -> bool {
+    let (_, tag) = decompose_data::<u64>(version.load(Ordering::SeqCst));
+    tag & 1 == 1
 }
 
 impl NodeHeader {
     pub fn new() -> Self {
-        let ver: Atomic<u64> = Atomic::new(0);
-        ver.store(Owned::new(0).with_tag(0), Ordering::SeqCst);
         NodeHeader {
-            version: ver,
+            version: Arc::new(AtomicUsize::new(data_with_tag::<u64>(0, 0))),
             num_children: 0,
             partial_len: 0,
             partial: unsafe { mem::uninitialized() },
@@ -82,11 +111,11 @@ impl NodeHeader {
 
     pub fn write_lock_or_restart(&self, g: &Guard) -> bool {
         loop {
-            let mut ver = self.version.load(Ordering::SeqCst, g);
+            let mut ver = self.version.load(Ordering::SeqCst);
             while is_locked(&self.version, g) {
                 unsafe {
                     _mm_pause();
-                    ver = self.version.load(Ordering::SeqCst, g);
+                    ver = self.version.load(Ordering::SeqCst);
                 }
             }
 
@@ -94,11 +123,11 @@ impl NodeHeader {
                 return true;
             }
 
-            match self.version.compare_and_set(
+            match self.version.compare_exchange_weak(
                 ver,
-                Owned::new(ver.as_raw() as u64 + 1).with_tag(ver.tag()),
+                ver + 1,
                 Ordering::SeqCst,
-                g,
+                Ordering::Relaxed,
             ) {
                 Ok(_) => break,
                 Err(_) => continue,
