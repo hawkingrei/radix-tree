@@ -125,7 +125,7 @@ impl NodeHeader {
 
             match self.version.compare_exchange_weak(
                 ver,
-                ver + 1,
+                ver + 0b10,
                 Ordering::SeqCst,
                 Ordering::Relaxed,
             ) {
@@ -169,6 +169,20 @@ impl NodeHeader {
         }
         self.partial_len
     }
+
+    pub fn is_locked(&self) -> bool {
+        is_locked(&self.version)
+    }
+}
+
+#[test]
+fn lock() {
+    let mut header = NodeHeader::new();
+    assert_eq!(header.is_locked(), false);
+    assert_eq!(header.write_lock_or_restart(), false);
+    assert_eq!(header.is_locked(), true);
+    header.write_unlock();
+    assert_eq!(header.is_locked(), false);
 }
 
 pub struct Node4<K, T>
