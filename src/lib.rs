@@ -146,19 +146,11 @@ impl NodeHeader {
             .compare_exchange(ver, ver + 1, Ordering::SeqCst, Ordering::Relaxed)
         {
             Ok(_) => {
-                let ver = self.version.load(Ordering::SeqCst);
-                self.version
-                    .store(data_with_tag::<u64>(ver, 0b10), Ordering::SeqCst);
+                self.write_unlock();
             }
             Err(_) => return true,
         }
         return false;
-    }
-
-    pub fn write_unlock(&self) {
-        let ver = self.version.load(Ordering::SeqCst);
-        self.version
-            .store(data_with_tag::<u64>(ver, 0b0), Ordering::SeqCst);
     }
 
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
@@ -172,6 +164,12 @@ impl NodeHeader {
 
     pub fn is_locked(&self) -> bool {
         is_locked(&self.version)
+    }
+
+    fn write_unlock(&self) {
+        let ver = self.version.load(Ordering::SeqCst);
+        self.version
+            .store(data_with_tag::<u64>(ver, 0b0), Ordering::SeqCst);
     }
 }
 
