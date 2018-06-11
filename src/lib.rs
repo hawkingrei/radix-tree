@@ -340,7 +340,7 @@ where
     V: 'static + Send + Sync,
 {
     fn drop(&mut self) {
-        for i in 0..self.header.num_children {
+        for i in 0..256 {
             drop(&mut self.children[i as usize]);
         }
     }
