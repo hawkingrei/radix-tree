@@ -62,11 +62,11 @@ pub struct NodeHeader {
 }
 
 pub fn is_locked(version: &Arc<AtomicUsize>) -> bool {
-    version.load(Ordering::Acquire) & 0b10 == 0b10
+    version.load(Ordering::SeqCst) & 0b10 == 0b10
 }
 
 pub fn is_obsolete(version: &Arc<AtomicUsize>) -> bool {
-    version.load(Ordering::Acquire) & 1 == 1
+    version.load(Ordering::SeqCst) & 1 == 1
 }
 
 impl NodeHeader {
@@ -81,7 +81,7 @@ impl NodeHeader {
 
     pub fn write_lock_or_restart(&self) -> bool {
         loop {
-            let mut ver = self.version.load(Ordering::Acquire);
+            let mut ver = self.version.load(Ordering::SeqCst);
             while is_locked(&self.version) {
                 unsafe {
                     _mm_pause();
