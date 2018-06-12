@@ -81,7 +81,7 @@ impl NodeHeader {
 
     pub fn write_lock_or_restart(&self) -> bool {
         loop {
-            let mut ver = self.version.load(Ordering::SeqCst);
+            let mut ver = self.version.load(Ordering::Acquire);
             while is_locked(&self.version) {
                 unsafe {
                     _mm_pause();
