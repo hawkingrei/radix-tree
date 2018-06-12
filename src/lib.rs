@@ -62,11 +62,11 @@ pub struct NodeHeader {
 }
 
 pub fn is_locked(version: &Arc<AtomicUsize>) -> bool {
-    version.load(Ordering::SeqCst) & 0b10 == 0b10
+    version.load(Ordering::Acquire) & 0b10 == 0b10
 }
 
 pub fn is_obsolete(version: &Arc<AtomicUsize>) -> bool {
-    version.load(Ordering::SeqCst) & 1 == 1
+    version.load(Ordering::Acquire) & 1 == 1
 }
 
 impl NodeHeader {
