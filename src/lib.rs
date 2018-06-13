@@ -17,10 +17,10 @@ pub const SMALL_STRUCT: usize = 8;
 type Small = [u8; SMALL_STRUCT];
 
 macro_rules! rep_no_copy {
-    ($t:ty ;$e:expr; $n:expr) => {{
-        let mut v:[$t;$n]  = unsafe { mem::uninitialized() };
+    ($t:ty; $e:expr; $n:expr) => {{
+        let mut v: Vec<$t> = Vec::with_capacity($n);
         for i in 0..$n {
-            v[i] = $e;
+            v.push($e);
         }
         v
     }};
@@ -157,8 +157,8 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: [K; 4],
-    children: [ArtNode<K, T>; 4],
+    keys: Vec<K>,
+    children: Vec<ArtNode<K, T>>,
     marker: PhantomData<T>,
 }
 
@@ -167,8 +167,8 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: [K; 16],
-    children: [ArtNode<K, T>; 16],
+    keys: Vec<K>,
+    children: Vec<ArtNode<K, T>>,
     marker: PhantomData<T>,
 }
 
@@ -177,8 +177,8 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: [K; 256],
-    children: [ArtNode<K, T>; 48],
+    keys: Vec<K>,
+    children: Vec<ArtNode<K, T>>,
     marker: PhantomData<T>,
 }
 
@@ -187,7 +187,7 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    children: [ArtNode<K, T>; 256],
+    children: Vec<ArtNode<K, T>>,
     marker: PhantomData<T>,
 }
 
