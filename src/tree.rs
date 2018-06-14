@@ -1,3 +1,6 @@
+use node::{ArtKey, ArtNode};
+use std::marker::PhantomData;
+
 /// A simple lock-free radix tree.
 pub struct Radix<'a, K: 'a + ArtKey, V: 'a>
 where

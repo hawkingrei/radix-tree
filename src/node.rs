@@ -1,3 +1,25 @@
+use node16::Node16;
+use node256::Node256;
+use node4::Node4;
+use node48::Node48;
+use std::arch::x86_64::_mm_pause;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::{mem, ptr};
+
+const MAX_PREFIX_LEN: usize = 6;
+
+#[macro_export]
+macro_rules! rep_no_copy {
+    ($t:ty; $e:expr; $n:expr) => {{
+        let mut v: Vec<$t> = Vec::with_capacity($n);
+        for i in 0..$n {
+            v.push($e);
+        }
+        v
+    }};
+}
+
 enum NodeType {
     NODE4,
     NODE16,
@@ -28,7 +50,7 @@ pub trait ArtKey {
 pub struct NodeHeader {
     //NodeType: NodeType,
     version: Arc<AtomicUsize>, // unlock 0, lock 1
-    num_children: u8,
+    pub num_children: u8,
     partial: [u8; MAX_PREFIX_LEN],
     partial_len: usize,
 }
@@ -124,7 +146,7 @@ fn lock() {
     assert_eq!(header.is_locked(), false);
 }
 
-trait ArtNodeTrait<K, V>
+pub trait ArtNodeTrait<K, V>
 where
     V: 'static + Send + Sync,
 {

@@ -1,3 +1,7 @@
+use node;
+use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use std::marker::PhantomData;
+
 pub struct Node4<K, T>
 where
     T: 'static + Send + Sync,
