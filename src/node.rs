@@ -13,7 +13,7 @@ const MAX_PREFIX_LEN: usize = 6;
 macro_rules! rep_no_copy {
     ($t:ty; $e:expr; $n:expr) => {{
         let mut v: Vec<$t> = Vec::with_capacity($n);
-        for i in 0..$n {
+        for _ in 0..$n {
             v.push($e);
         }
         v
