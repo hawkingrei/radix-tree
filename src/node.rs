@@ -101,7 +101,7 @@ impl NodeHeader {
     }
 
     pub fn lock_version_or_restart(&self) -> bool {
-        if is_obsolete(&self.version) || is_obsolete(&self.version) {
+        if is_locked(&self.version) || is_obsolete(&self.version) {
             return true;
         }
         let ver = self.version.load(Ordering::SeqCst);
