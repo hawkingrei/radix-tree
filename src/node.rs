@@ -132,6 +132,11 @@ impl NodeHeader {
 
     fn write_unlock(&self) {
         let ver = self.version.load(Ordering::SeqCst);
+        self.version.store(ver + 2, Ordering::SeqCst);
+    }
+
+    fn write_unlock_obsolete(&self) {
+        let ver = self.version.load(Ordering::SeqCst);
         self.version.store(ver + 3, Ordering::SeqCst);
     }
 }
