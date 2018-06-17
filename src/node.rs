@@ -105,10 +105,12 @@ impl NodeHeader {
             return true;
         }
         let ver = self.version.load(Ordering::SeqCst);
-        match self
-            .version
-            .compare_exchange(ver, ver + 1, Ordering::SeqCst, Ordering::Relaxed)
-        {
+        match self.version.compare_exchange(
+            ver,
+            ver.wrapping_add(1),
+            Ordering::SeqCst,
+            Ordering::Relaxed,
+        ) {
             Ok(_) => {
                 self.write_unlock();
             }
@@ -132,12 +134,12 @@ impl NodeHeader {
 
     fn write_unlock(&self) {
         let ver = self.version.load(Ordering::SeqCst);
-        self.version.store(ver + 2, Ordering::SeqCst);
+        self.version.store(ver.wrapping_add(2), Ordering::SeqCst);
     }
 
     fn write_unlock_obsolete(&self) {
         let ver = self.version.load(Ordering::SeqCst);
-        self.version.store(ver + 3, Ordering::SeqCst);
+        self.version.store(ver.wrapping_add(3), Ordering::SeqCst);
     }
 }
 
