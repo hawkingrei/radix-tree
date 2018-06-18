@@ -9,17 +9,6 @@ use std::{mem, ptr};
 
 const MAX_PREFIX_LEN: usize = 6;
 
-#[macro_export]
-macro_rules! rep_no_copy {
-    ($t:ty; $e:expr; $n:expr) => {{
-        let mut v: Vec<$t> = Vec::with_capacity($n);
-        for _ in 0..$n {
-            v.push($e);
-        }
-        v
-    }};
-}
-
 enum NodeType {
     NODE4,
     NODE16,
