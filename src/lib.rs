@@ -5,6 +5,7 @@ extern crate crossbeam_utils;
 
 #[macro_use]
 mod internal;
+mod epoch;
 mod node;
 mod node16;
 mod node256;
