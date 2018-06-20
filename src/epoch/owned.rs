@@ -1,11 +1,12 @@
 use epoch::guard::Guard;
 use epoch::pointer::Pointer;
 use epoch::shared::Shared;
+use std::borrow::{Borrow, BorrowMut};
 use std::boxed::Box;
 use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 /// Returns a bitmask containing the unused least significant bits of an aligned pointer to `T`.
 #[inline]
@@ -177,5 +178,36 @@ impl<T> Deref for Owned<T> {
     fn deref(&self) -> &T {
         let raw = self.data as *mut T;
         unsafe { &*raw }
+    }
+}
+
+impl<T> DerefMut for Owned<T> {
+    fn deref_mut(&mut self) -> &mut T {
+        let raw = self.data as *mut T;
+        unsafe { &mut *raw }
+    }
+}
+
+impl<T> Borrow<T> for Owned<T> {
+    fn borrow(&self) -> &T {
+        &**self
+    }
+}
+
+impl<T> BorrowMut<T> for Owned<T> {
+    fn borrow_mut(&mut self) -> &mut T {
+        &mut **self
+    }
+}
+
+impl<T> AsRef<T> for Owned<T> {
+    fn as_ref(&self) -> &T {
+        &**self
+    }
+}
+
+impl<T> AsMut<T> for Owned<T> {
+    fn as_mut(&mut self) -> &mut T {
+        &mut **self
     }
 }
