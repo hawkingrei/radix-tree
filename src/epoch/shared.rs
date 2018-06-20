@@ -1,6 +1,8 @@
+use epoch::ensure_aligned;
 use epoch::owned::Owned;
 use epoch::pointer::Pointer;
 use std::cmp;
+use std::fmt;
 use std::marker::PhantomData;
 use std::ptr;
 /// A pointer to an object protected by the epoch GC.
@@ -149,6 +151,30 @@ impl<'g, T> Shared<'g, T> {
         self.as_raw().as_ref()
     }
 
+    /// Takes ownership of the pointee.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this pointer is null, but only in debug mode.
+    ///
+    /// # Safety
+    ///
+    /// This method may be called only if the pointer is valid and nobody else is holding a
+    /// reference to the same object.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::{self as epoch, Atomic};
+    /// use std::sync::atomic::Ordering::SeqCst;
+    ///
+    /// let a = Atomic::new(1234);
+    /// unsafe {
+    ///     let guard = &epoch::unprotected();
+    ///     let p = a.load(SeqCst, guard);
+    ///     drop(p.into_owned());
+    /// }
+    /// ```
     pub unsafe fn into_owned(self) -> Owned<T> {
         debug_assert!(
             self.as_raw() != ptr::null(),
@@ -175,5 +201,46 @@ impl<'g, T> PartialOrd<Shared<'g, T>> for Shared<'g, T> {
 impl<'g, T> Ord for Shared<'g, T> {
     fn cmp(&self, other: &Self) -> cmp::Ordering {
         self.data.cmp(&other.data)
+    }
+}
+
+impl<'g, T> From<*const T> for Shared<'g, T> {
+    /// Returns a new pointer pointing to `raw`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `raw` is not properly aligned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::Shared;
+    ///
+    /// let p = unsafe { Shared::from(Box::into_raw(Box::new(1234)) as *const _) };
+    /// assert!(!p.is_null());
+    /// ```
+    fn from(raw: *const T) -> Self {
+        ensure_aligned(raw);
+        unsafe { Self::from_usize(raw as usize) }
+    }
+}
+
+impl<'g, T> fmt::Debug for Shared<'g, T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let raw = self.data as *mut T;
+
+        f.debug_struct("Shared").field("raw", &raw).finish()
+    }
+}
+
+impl<'g, T> fmt::Pointer for Shared<'g, T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Pointer::fmt(&self.as_raw(), f)
+    }
+}
+
+impl<'g, T> Default for Shared<'g, T> {
+    fn default() -> Self {
+        Shared::null()
     }
 }

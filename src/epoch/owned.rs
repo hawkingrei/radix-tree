@@ -1,3 +1,4 @@
+use epoch::ensure_aligned;
 use epoch::guard::Guard;
 use epoch::pointer::Pointer;
 use epoch::shared::Shared;
@@ -7,18 +8,6 @@ use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Deref, DerefMut};
-
-/// Returns a bitmask containing the unused least significant bits of an aligned pointer to `T`.
-#[inline]
-fn low_bits<T>() -> usize {
-    (1 << mem::align_of::<T>().trailing_zeros()) - 1
-}
-
-/// Panics if the pointer is not properly unaligned.
-#[inline]
-fn ensure_aligned<T>(raw: *const T) {
-    assert_eq!(raw as usize & low_bits::<T>(), 0, "unaligned pointer");
-}
 
 /// An owned heap-allocated object.
 ///
