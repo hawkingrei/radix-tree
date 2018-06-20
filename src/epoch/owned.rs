@@ -110,6 +110,24 @@ impl<T> Owned<T> {
     pub fn into_shared<'g>(self, _: &'g Guard) -> Shared<'g, T> {
         unsafe { Shared::from_usize(self.into_usize()) }
     }
+
+    
+    /// Converts the owned pointer into a `Box`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::{self as epoch, Owned};
+    ///
+    /// let o = Owned::new(1234);
+    /// let b: Box<i32> = o.into_box();
+    /// assert_eq!(*b, 1234);
+    /// ```
+    pub fn into_box(self) -> Box<T> {
+        let raw = self.data as *mut T;
+        mem::forget(self);
+        unsafe { Box::from_raw(raw) }
+    }
 }
 
 impl<T> From<Box<T>> for Owned<T> {
