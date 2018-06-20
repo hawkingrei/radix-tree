@@ -1,4 +1,6 @@
+use epoch::guard::Guard;
 use epoch::pointer::Pointer;
+use epoch::shared::Shared;
 use std::boxed::Box;
 use std::marker::PhantomData;
 use std::mem;
@@ -90,6 +92,23 @@ impl<T> Owned<T> {
     pub unsafe fn from_raw(raw: *mut T) -> Owned<T> {
         ensure_aligned(raw);
         Self::from_usize(raw as usize)
+    }
+
+    /// Converts the owned pointer into a [`Shared`].
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::{self as epoch, Owned};
+    ///
+    /// let o = Owned::new(1234);
+    /// let guard = &epoch::pin();
+    /// let p = o.into_shared(guard);
+    /// ```
+    ///
+    /// [`Shared`]: struct.Shared.html
+    pub fn into_shared<'g>(self, _: &'g Guard) -> Shared<'g, T> {
+        unsafe { Shared::from_usize(self.into_usize()) }
     }
 }
 
