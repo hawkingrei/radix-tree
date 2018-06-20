@@ -164,3 +164,18 @@ impl<T> fmt::Debug for Owned<T> {
         f.debug_struct("Owned").field("raw", &raw).finish()
     }
 }
+
+impl<T: Clone> Clone for Owned<T> {
+    fn clone(&self) -> Self {
+        Owned::new((**self).clone())
+    }
+}
+
+impl<T> Deref for Owned<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        let raw = self.data as *mut T;
+        unsafe { &*raw }
+    }
+}
