@@ -1,7 +1,8 @@
+use epoch::owned::Owned;
 use epoch::pointer::Pointer;
 use std::cmp;
 use std::marker::PhantomData;
-
+use std::ptr;
 /// A pointer to an object protected by the epoch GC.
 ///
 /// The pointer is valid for use only during the lifetime `'g`.
@@ -55,6 +56,105 @@ impl<'g, T> Shared<'g, T> {
             data: 0,
             _marker: PhantomData,
         }
+    }
+
+    /// Converts the pointer to a raw pointer (without the tag).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::{self as epoch, Atomic, Owned};
+    /// use std::sync::atomic::Ordering::SeqCst;
+    ///
+    /// let o = Owned::new(1234);
+    /// let raw = &*o as *const _;
+    /// let a = Atomic::from(o);
+    ///
+    /// let guard = &epoch::pin();
+    /// let p = a.load(SeqCst, guard);
+    /// assert_eq!(p.as_raw(), raw);
+    /// ```
+    pub fn as_raw(&self) -> *const T {
+        let raw = self.data as *mut T;
+        raw
+    }
+
+    /// Dereferences the pointer.
+    ///
+    /// Returns a reference to the pointee that is valid during the lifetime `'g`.
+    ///
+    /// # Safety
+    ///
+    /// Dereferencing a pointer is unsafe because it could be pointing to invalid memory.
+    ///
+    /// Another concern is the possiblity of data races due to lack of proper synchronization.
+    /// For example, consider the following scenario:
+    ///
+    /// 1. A thread creates a new object: `a.store(Owned::new(10), Relaxed)`
+    /// 2. Another thread reads it: `*a.load(Relaxed, guard).as_ref().unwrap()`
+    ///
+    /// The problem is that relaxed orderings don't synchronize initialization of the object with
+    /// the read from the second thread. This is a data race. A possible solution would be to use
+    /// `Release` and `Acquire` orderings.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::{self as epoch, Atomic};
+    /// use std::sync::atomic::Ordering::SeqCst;
+    ///
+    /// let a = Atomic::new(1234);
+    /// let guard = &epoch::pin();
+    /// let p = a.load(SeqCst, guard);
+    /// unsafe {
+    ///     assert_eq!(p.deref(), &1234);
+    /// }
+    /// ```
+    pub unsafe fn deref(&self) -> &'g T {
+        &*self.as_raw()
+    }
+
+    /// Converts the pointer to a reference.
+    ///
+    /// Returns `None` if the pointer is null, or else a reference to the object wrapped in `Some`.
+    ///
+    /// # Safety
+    ///
+    /// Dereferencing a pointer is unsafe because it could be pointing to invalid memory.
+    ///
+    /// Another concern is the possiblity of data races due to lack of proper synchronization.
+    /// For example, consider the following scenario:
+    ///
+    /// 1. A thread creates a new object: `a.store(Owned::new(10), Relaxed)`
+    /// 2. Another thread reads it: `*a.load(Relaxed, guard).as_ref().unwrap()`
+    ///
+    /// The problem is that relaxed orderings don't synchronize initialization of the object with
+    /// the read from the second thread. This is a data race. A possible solution would be to use
+    /// `Release` and `Acquire` orderings.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::{self as epoch, Atomic};
+    /// use std::sync::atomic::Ordering::SeqCst;
+    ///
+    /// let a = Atomic::new(1234);
+    /// let guard = &epoch::pin();
+    /// let p = a.load(SeqCst, guard);
+    /// unsafe {
+    ///     assert_eq!(p.as_ref(), Some(&1234));
+    /// }
+    /// ```
+    pub unsafe fn as_ref(&self) -> Option<&'g T> {
+        self.as_raw().as_ref()
+    }
+
+    pub unsafe fn into_owned(self) -> Owned<T> {
+        debug_assert!(
+            self.as_raw() != ptr::null(),
+            "converting a null `Shared` into `Owned`"
+        );
+        Owned::from_usize(self.data)
     }
 }
 
