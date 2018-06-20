@@ -45,3 +45,22 @@ impl<'g, T> Pointer<T> for Shared<'g, T> {
         }
     }
 }
+
+impl<'g, T> Shared<'g, T> {
+    /// Returns a new null pointer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crossbeam_epoch::Shared;
+    ///
+    /// let p = Shared::<i32>::null();
+    /// assert!(p.is_null());
+    /// ```
+    pub fn null() -> Shared<'g, T> {
+        Shared {
+            data: 0,
+            _marker: PhantomData,
+        }
+    }
+}
