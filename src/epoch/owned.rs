@@ -2,6 +2,7 @@ use epoch::guard::Guard;
 use epoch::pointer::Pointer;
 use epoch::shared::Shared;
 use std::boxed::Box;
+use std::fmt;
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::Deref;
@@ -111,7 +112,6 @@ impl<T> Owned<T> {
         unsafe { Shared::from_usize(self.into_usize()) }
     }
 
-    
     /// Converts the owned pointer into a `Box`.
     ///
     /// # Examples
@@ -146,5 +146,21 @@ impl<T> From<Box<T>> for Owned<T> {
     /// ```
     fn from(b: Box<T>) -> Self {
         unsafe { Self::from_raw(Box::into_raw(b)) }
+    }
+}
+
+impl<T> Drop for Owned<T> {
+    fn drop(&mut self) {
+        let raw = self.data as *mut T;
+        unsafe {
+            drop(Box::from_raw(raw));
+        }
+    }
+}
+
+impl<T> fmt::Debug for Owned<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let raw = self.data as *mut T;
+        f.debug_struct("Owned").field("raw", &raw).finish()
     }
 }
