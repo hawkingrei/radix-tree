@@ -1,5 +1,5 @@
+use std::cmp;
 use std::marker::PhantomData;
-
 /// A trait for either `Owned` or `Shared` pointers.
 pub trait Pointer<T> {
     /// Returns the machine representation of the pointer.
@@ -62,5 +62,25 @@ impl<'g, T> Shared<'g, T> {
             data: 0,
             _marker: PhantomData,
         }
+    }
+}
+
+impl<'g, T> PartialEq<Shared<'g, T>> for Shared<'g, T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.data == other.data
+    }
+}
+
+impl<'g, T> Eq for Shared<'g, T> {}
+
+impl<'g, T> PartialOrd<Shared<'g, T>> for Shared<'g, T> {
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        self.data.partial_cmp(&other.data)
+    }
+}
+
+impl<'g, T> Ord for Shared<'g, T> {
+    fn cmp(&self, other: &Self) -> cmp::Ordering {
+        self.data.cmp(&other.data)
     }
 }
