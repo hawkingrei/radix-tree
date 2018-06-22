@@ -1,4 +1,5 @@
 mod deferred;
+mod epoch;
 mod guard;
 mod internal;
 mod owned;

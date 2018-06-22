@@ -48,7 +48,7 @@ impl<'g, T> Shared<'g, T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::Shared;
+    /// use epoch::Shared;
     ///
     /// let p = Shared::<i32>::null();
     /// assert!(p.is_null());
@@ -65,7 +65,7 @@ impl<'g, T> Shared<'g, T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::{self as epoch, Atomic, Owned};
+    /// use epoch::{self as epoch, Atomic, Owned};
     /// use std::sync::atomic::Ordering::SeqCst;
     ///
     /// let o = Owned::new(1234);
@@ -102,7 +102,7 @@ impl<'g, T> Shared<'g, T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::{self as epoch, Atomic};
+    /// use epoch::{self as epoch, Atomic};
     /// use std::sync::atomic::Ordering::SeqCst;
     ///
     /// let a = Atomic::new(1234);
@@ -137,7 +137,7 @@ impl<'g, T> Shared<'g, T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::{self as epoch, Atomic};
+    /// use epoch::{self as epoch, Atomic};
     /// use std::sync::atomic::Ordering::SeqCst;
     ///
     /// let a = Atomic::new(1234);
@@ -165,7 +165,7 @@ impl<'g, T> Shared<'g, T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::{self as epoch, Atomic};
+    /// use epoch::{self as epoch, Atomic};
     /// use std::sync::atomic::Ordering::SeqCst;
     ///
     /// let a = Atomic::new(1234);
@@ -214,7 +214,7 @@ impl<'g, T> From<*const T> for Shared<'g, T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::Shared;
+    /// use epoch::Shared;
     ///
     /// let p = unsafe { Shared::from(Box::into_raw(Box::new(1234)) as *const _) };
     /// assert!(!p.is_null());
