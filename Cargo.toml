@@ -4,5 +4,4 @@ version = "0.1.0"
 authors = ["hawking.rei <hawking.rei@gmail.com>"]
 
 [dependencies]
-crossbeam-epoch = "0.4.1"
-crossbeam-utils = "0.4.0"
+arrayvec = "0.4.7"

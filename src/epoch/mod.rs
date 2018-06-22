@@ -1,4 +1,6 @@
+mod deferred;
 mod guard;
+mod internal;
 mod owned;
 mod pointer;
 mod shared;

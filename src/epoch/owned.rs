@@ -55,7 +55,7 @@ impl<T> Owned<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::Owned;
+    /// use epoch::Owned;
     ///
     /// let o = Owned::new(1234);
     /// ```
@@ -76,7 +76,7 @@ impl<T> Owned<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::Owned;
+    /// use epoch::Owned;
     ///
     /// let o = unsafe { Owned::from_raw(Box::into_raw(Box::new(1234))) };
     /// ```
@@ -90,7 +90,7 @@ impl<T> Owned<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::{self as epoch, Owned};
+    /// use epoch::{self as epoch, Owned};
     ///
     /// let o = Owned::new(1234);
     /// let guard = &epoch::pin();
@@ -107,7 +107,7 @@ impl<T> Owned<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::{self as epoch, Owned};
+    /// use epoch::{self as epoch, Owned};
     ///
     /// let o = Owned::new(1234);
     /// let b: Box<i32> = o.into_box();
@@ -130,7 +130,7 @@ impl<T> From<Box<T>> for Owned<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_epoch::Owned;
+    /// use epoch::Owned;
     ///
     /// let o = unsafe { Owned::from_raw(Box::into_raw(Box::new(1234))) };
     /// ```
