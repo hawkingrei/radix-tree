@@ -5,3 +5,8 @@ authors = ["hawking.rei <hawking.rei@gmail.com>"]
 
 [dependencies]
 arrayvec = "0.4.7"
+crossbeam-epoch = "0.4.1"
+crossbeam-utils = "0.4"
+lazy_static = { version = "1", optional = true }
+memoffset = { version = "0.2" }
+scopeguard = { version = "0.3", default-features = false }

@@ -16,7 +16,7 @@ use std::ops::{Deref, DerefMut};
 /// The pointer must be properly aligned. Since it is aligned, a tag can be stored into the unused
 /// least significant bits of the address.
 pub struct Owned<T> {
-    data: usize,
+    pub data: usize,
     _marker: PhantomData<Box<T>>,
 }
 

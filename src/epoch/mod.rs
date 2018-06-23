@@ -1,3 +1,4 @@
+mod collector;
 mod deferred;
 mod epoch;
 mod guard;
@@ -5,6 +6,7 @@ mod internal;
 mod owned;
 mod pointer;
 mod shared;
+mod sync;
 
 use std::mem;
 /// Returns a bitmask containing the unused least significant bits of an aligned pointer to `T`.

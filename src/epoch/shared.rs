@@ -12,7 +12,7 @@ use std::ptr;
 /// The pointer must be properly aligned. Since it is aligned, a tag can be stored into the unused
 /// least significant bits of the address.
 pub struct Shared<'g, T: 'g> {
-    data: usize,
+    pub data: usize,
     _marker: PhantomData<(&'g (), *const T)>,
 }
 
