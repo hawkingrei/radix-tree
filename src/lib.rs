@@ -1,5 +1,3 @@
-#![feature(use_extern_macros)]
-#![feature(fixed_size_array)]
 extern crate arrayvec;
 extern crate crossbeam_epoch;
 extern crate crossbeam_utils;
