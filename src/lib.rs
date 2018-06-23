@@ -1,4 +1,3 @@
-extern crate arrayvec;
 extern crate crossbeam_epoch;
 extern crate crossbeam_utils;
 #[cfg(feature = "use_std")]

@@ -126,7 +126,7 @@ impl NodeHeader {
         self.version.store(ver.wrapping_add(2), Ordering::SeqCst);
     }
 
-    fn write_unlock_obsolete(&self) {
+    pub fn write_unlock_obsolete(&self) {
         let ver = self.version.load(Ordering::SeqCst);
         self.version.store(ver.wrapping_add(3), Ordering::SeqCst);
     }
@@ -148,12 +148,12 @@ where
 {
     fn new() -> Self;
 
-    //fn add_child(&mut self, node: ArtNode<K, V>, byte: u8);
+    fn add_child(&mut self, node: ArtNode<K, V>, byte: u8);
 
     //fn clean_child(&mut self, byte: u8) -> bool;
 
-    //#[inline]
-    //fn is_full(&self) -> bool;
+    #[inline]
+    fn is_full(&self) -> bool;
 
     //fn grow_and_add(self, leaf: ArtNode<K, V>, byte: u8) -> ArtNode<K, V>;
 

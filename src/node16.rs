@@ -25,6 +25,12 @@ where
             marker: Default::default(),
         }
     }
+
+    fn add_child(&mut self, node: ArtNode<K, V>, byte: u8) {}
+
+    fn is_full(&self) -> bool {
+        self.header.num_children >= 16
+    }
 }
 
 impl<K, V> Drop for Node16<K, V>

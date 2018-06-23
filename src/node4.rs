@@ -25,6 +25,14 @@ where
             marker: Default::default(),
         }
     }
+
+    fn add_child(&mut self, node: ArtNode<K, V>, byte: u8) {
+        self.header.write_unlock_obsolete();
+    }
+
+    fn is_full(&self) -> bool {
+        self.header.num_children >= 4
+    }
 }
 
 impl<K, V> Drop for Node4<K, V>
