@@ -1,6 +1,15 @@
 #![feature(use_extern_macros)]
 #![feature(fixed_size_array)]
 extern crate arrayvec;
+extern crate crossbeam_epoch;
+extern crate crossbeam_utils;
+#[cfg(feature = "use_std")]
+#[macro_use]
+extern crate lazy_static;
+#[macro_use]
+extern crate memoffset;
+#[macro_use]
+extern crate scopeguard;
 
 #[macro_use]
 mod internal;
