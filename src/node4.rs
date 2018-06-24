@@ -33,6 +33,24 @@ where
     fn is_full(&self) -> bool {
         self.header.num_children >= 4
     }
+
+    //#[inline]
+    //fn find_child_mut(
+    //    &mut self,
+    //    byte: usize,
+    //    level: usize,
+    //    parent: ArtNode<K, V>,
+    //    version_parent: usize,
+    //) -> Result<&mut ArtNode<K, V>, ()> {
+    //    let mut version = 0;
+    //    loop {
+    //        match self.header.read_lock_or_restart() {
+    //            Ok(ver) => version = ver,
+    //            Err(true) => continue,
+    //            Err(false) => return Err(()),
+    //        }
+    //    }
+    //}
 }
 
 impl<K, V> Drop for Node4<K, V>

@@ -189,7 +189,13 @@ where
     //fn header(&self) -> &NodeHeader;
 
     //#[inline]
-    //fn find_child_mut(&mut self, byte: u8) -> &mut ArtNode<K, V>;
+    //fn find_child_mut(
+    //    &mut self,
+    //    byte: usize,
+    //    level: usize,
+    //    parent: ArtNode<K, V>,
+    //    version_parent: usize,
+    //) -> &mut ArtNode<K, V>;
 
     //#[inline]
     //fn find_child(&self, byte: u8) -> Option<&ArtNode<K, V>>;
