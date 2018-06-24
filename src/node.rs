@@ -62,6 +62,11 @@ impl NodeHeader {
         }
     }
 
+    #[inline]
+    pub fn read_version(&self) -> usize {
+        return self.version.load(Ordering::SeqCst);
+    }
+
     pub fn write_lock_or_restart(&self) -> bool {
         loop {
             let mut ver = self.version.load(Ordering::SeqCst);
@@ -108,6 +113,13 @@ impl NodeHeader {
         return false;
     }
 
+    pub fn read_unlock_or_restart(header: NodeHeader, version: usize) -> bool {
+        if header.read_version() == version {
+            return false;
+        }
+        return true;
+    }
+
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
         for i in 0..self.partial_len {
             if key.bytes()[i + depth] != self.partial[i] {
@@ -121,17 +133,15 @@ impl NodeHeader {
         is_locked(&self.version)
     }
 
-    pub fn read_lock_or_restart(&self) -> Result<usize, ()> {
-        loop {
-            if is_locked(&self.version) {
-                continue;
-            }
-            if is_obsolete(&self.version) {
-                return Err(());
-            }
-            let ver = self.version.load(Ordering::SeqCst);
-            return Ok(ver);
+    pub fn read_lock_or_restart(&self) -> Result<usize, bool> {
+        if is_locked(&self.version) {
+            return Err(true);
         }
+        if is_obsolete(&self.version) {
+            return Err(false);
+        }
+        let ver = self.version.load(Ordering::SeqCst);
+        return Ok(ver);
     }
 
     fn write_unlock(&self) {
