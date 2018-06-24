@@ -121,6 +121,19 @@ impl NodeHeader {
         is_locked(&self.version)
     }
 
+    pub fn read_lock_or_restart(&self) -> Result<usize, ()> {
+        loop {
+            if is_locked(&self.version) {
+                continue;
+            }
+            if is_obsolete(&self.version) {
+                return Err(());
+            }
+            let ver = self.version.load(Ordering::SeqCst);
+            return Ok(ver);
+        }
+    }
+
     fn write_unlock(&self) {
         let ver = self.version.load(Ordering::SeqCst);
         self.version.store(ver.wrapping_add(2), Ordering::SeqCst);
