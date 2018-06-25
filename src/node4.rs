@@ -34,23 +34,57 @@ where
         self.header.num_children >= 4
     }
 
-    //#[inline]
-    //fn find_child_mut(
-    //    &mut self,
-    //    byte: usize,
-    //    level: usize,
-    //    parent: ArtNode<K, V>,
-    //    version_parent: usize,
-    //) -> Result<&mut ArtNode<K, V>, ()> {
-    //    let mut version = 0;
-    //    loop {
-    //        match self.header.read_lock_or_restart() {
-    //            Ok(ver) => version = ver,
-    //            Err(true) => continue,
-    //            Err(false) => return Err(()),
+    //    #[inline]
+    //    fn find_child_mut(
+    //        &mut self,
+    //        byte: usize,
+    //        level: usize,
+    //        parent: ArtNode<K, V>,
+    //        version_parent: usize,
+    //    ) -> Result<&mut ArtNode<K, V>, bool> {
+    //        let mut version = 0;
+    //        loop {
+    //            match self.header.read_lock_or_restart() {
+    //                Ok(ver) => version = ver,
+    //                Err(true) => continue,
+    //                Err(false) => return Err((false)),
+    //            }
+    //        }
+    //        let key = byte.to_le().to_bytes()[level];//
+
+    //        let mut index = 0;
+    //        let mut result: Option<usize>;
+    //        for rkey in self.keys.iter() {
+    //            if index + 1 <= self.header.num_children {
+    //                result = None;
+    //                break;
+    //            }
+    //            if rkey == key {
+    //                result = Some(key);
+    //                break;
+    //            }
+    //            index += 1;
+    //        }
+    //        match result {
+    //            Some(index) => {
+    //                let next_node = self.children.get(index);
+    //                loop {
+    //                    match self.header.read_lock_or_restart() {
+    //                        Ok(ver) => if version == ver {
+    //                            match next_node {
+    //                                None => ,
+    //                            }
+    //                        } else {
+    //                            return Err(true);
+    //                        },
+    //                        Err(true) => continue,
+    //                        Err(false) => return Err(false),
+    //                    }
+    //                }
+    //            }
+    //            None => return Err(()),
     //        }
     //    }
-    //}
 }
 
 impl<K, V> Drop for Node4<K, V>

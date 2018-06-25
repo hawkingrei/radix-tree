@@ -26,10 +26,11 @@ where
     Inner16(Box<Node16<K, V>>),
     Inner48(Box<Node48<K, V>>),
     Inner256(Box<Node256<K, V>>),
+    Value(usize),
     //LeafLarge(Box<(K, V)>),
     //LeafLargeKey(Box<K>, SmallStruct<V>),
     //LeafLargeValue(SmallStruct<K>, Box<V>),
-    //LeafSmall(SmallStruct<K>, SmallStruct<V>),
+    //LeafSmall(SmallStruct<K>, SmallStruct<V>)
 }
 
 pub trait ArtKey {
