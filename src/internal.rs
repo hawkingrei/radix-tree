@@ -8,3 +8,10 @@ macro_rules! rep_no_copy {
         v
     }};
 }
+
+pub trait Digital<'a> {
+    // TODO: consider providing a more efficient interface here (e.g. passing a slice directly)
+    type I: Iterator<Item = u8> + 'a;
+    const STOP_CHARACTER: Option<u8> = None;
+    fn digits(&'a self) -> Self::I;
+}
