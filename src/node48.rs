@@ -31,6 +31,17 @@ where
     fn is_full(&self) -> bool {
         self.header.num_children >= 48
     }
+
+    #[inline]
+    fn find_child_mut(
+        &mut self,
+        byte: usize,
+        level: usize,
+        parent: ArtNode<K, V>,
+        version_parent: usize,
+    ) -> &mut Result<&mut ArtNode<K, V>, bool> {
+        return &mut Err(false);
+    }
 }
 
 impl<K, V> Drop for Node48<K, V>
