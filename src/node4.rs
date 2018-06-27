@@ -1,22 +1,24 @@
+use internal::Digital;
 use node;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::mem;
 
-pub struct Node4<K, T>
+pub struct Node4<'a, K, T>
 where
+    K: Default + PartialEq + Digital<'a>,
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
     keys: Vec<K>,
-    children: Vec<ArtNode<K, T>>,
-    marker: PhantomData<T>,
+    children: Vec<ArtNode<'a, K, T>>,
+    marker: PhantomData<&'a T>,
 }
 
-impl<K, V> ArtNodeTrait<K, V> for Node4<K, V>
+impl<'a, K, V> ArtNodeTrait<'a, K, V> for Node4<'a, K, V>
 where
-    K: Default + PartialEq + From<usize>,
+    K: Default + PartialEq + Digital<'a>,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
@@ -90,8 +92,9 @@ where
     }
 }
 
-impl<K, V> Drop for Node4<K, V>
+impl<'a, K, V> Drop for Node4<'a, K, V>
 where
+    K: Default + PartialEq + Digital<'a>,
     V: 'static + Send + Sync,
 {
     fn drop(&mut self) {

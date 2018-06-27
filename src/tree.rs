@@ -6,7 +6,7 @@ pub struct Radix<'a, K: 'a + ArtKey, V: 'a>
 where
     V: 'static + Send + Sync,
 {
-    head: ArtNode<K, V>,
+    head: ArtNode<'a, K, V>,
     size: usize,
     level: usize,
     phantom: PhantomData<&'a K>,

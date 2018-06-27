@@ -1,3 +1,4 @@
+use internal::Digital;
 use node16::Node16;
 use node256::Node256;
 use node4::Node4;
@@ -16,16 +17,17 @@ enum NodeType {
     NODE256,
 }
 
-pub enum ArtNode<K, V>
+pub enum ArtNode<'a, K, V>
 where
+    K: Default + PartialEq + Digital<'a>,
     V: 'static + Send + Sync,
 {
     Empty,
 
-    Inner4(Box<Node4<K, V>>),
-    Inner16(Box<Node16<K, V>>),
-    Inner48(Box<Node48<K, V>>),
-    Inner256(Box<Node256<K, V>>),
+    Inner4(Box<Node4<'a, K, V>>),
+    Inner16(Box<Node16<'a, K, V>>),
+    Inner48(Box<Node48<'a, K, V>>),
+    Inner256(Box<Node256<'a, K, V>>),
     Value(usize),
     //LeafLarge(Box<(K, V)>),
     //LeafLargeKey(Box<K>, SmallStruct<V>),
@@ -166,8 +168,9 @@ fn lock() {
     assert_eq!(header.is_locked(), false);
 }
 
-pub trait ArtNodeTrait<K, V>
+pub trait ArtNodeTrait<'a, K, V>
 where
+    K: Default + PartialEq + Digital<'a>,
     V: 'static + Send + Sync,
 {
     fn new() -> Self;
