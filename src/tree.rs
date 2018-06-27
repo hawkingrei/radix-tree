@@ -1,20 +1,22 @@
+use internal::Digital;
 use node::{ArtKey, ArtNode};
 use std::marker::PhantomData;
 
 /// A simple lock-free radix tree.
-pub struct Radix<'a, K: 'a + ArtKey, V: 'a>
+pub struct Radix<K, V>
 where
+    K: Default + PartialEq + for<'a> Digital<'a> + ArtKey,
     V: 'static + Send + Sync,
 {
-    head: ArtNode<'a, K, V>,
+    head: ArtNode<K, V>,
     size: usize,
     level: usize,
-    phantom: PhantomData<&'a K>,
+    phantom: PhantomData<K>,
 }
 
-impl<'a, K: ArtKey, T> Default for Radix<'a, K, T>
+impl<K: ArtKey, T> Default for Radix<K, T>
 where
-    K: 'a + ArtKey,
+    K: Default + PartialEq + for<'a> Digital<'a> + ArtKey,
     T: 'static + Send + Sync,
 {
     fn default() -> Self {
@@ -27,9 +29,9 @@ where
     }
 }
 
-impl<'a, K: ArtKey, T> Radix<'a, K, T>
+impl<K: ArtKey, T> Radix<K, T>
 where
-    K: 'a + ArtKey,
+    K: Default + PartialEq + for<'a> Digital<'a> + ArtKey,
     T: 'static + Send + Sync,
 {
     fn new(level: usize) -> Self {

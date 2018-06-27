@@ -4,19 +4,19 @@ use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 
-pub struct Node256<'a, K, T>
+pub struct Node256<K, T>
 where
-    K: Default + Digital<'a>,
+    K: Default + PartialEq + for<'a> Digital<'a>,
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    children: Vec<ArtNode<'a, K, T>>,
+    children: Vec<ArtNode<K, T>>,
     marker: PhantomData<T>,
 }
 
-impl<'a, K, V> ArtNodeTrait<'a, K, V> for Node256<'a, K, V>
+impl<K, V> ArtNodeTrait<K, V> for Node256<K, V>
 where
-    K: Default + Digital<'a>,
+    K: Default + PartialEq + for<'a> Digital<'a>,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
@@ -45,9 +45,9 @@ where
     }
 }
 
-impl<'a, K, V> Drop for Node256<'a, K, V>
+impl<K, V> Drop for Node256<K, V>
 where
-    K: Default + Digital<'a>,
+    K: Default + PartialEq + for<'a> Digital<'a>,
     V: 'static + Send + Sync,
 {
     fn drop(&mut self) {
