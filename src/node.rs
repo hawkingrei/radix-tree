@@ -19,7 +19,7 @@ enum NodeType {
 
 pub enum ArtNode<K, V>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
     Empty,
@@ -170,7 +170,7 @@ fn lock() {
 
 pub trait ArtNodeTrait<K, V>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
     fn new() -> Self;

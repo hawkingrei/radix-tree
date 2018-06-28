@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 
 pub struct Node16<K, T>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
@@ -17,7 +17,7 @@ where
 
 impl<K, V> ArtNodeTrait<K, V> for Node16<K, V>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
@@ -49,7 +49,7 @@ where
 
 impl<K, V> Drop for Node16<K, V>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
     fn drop(&mut self) {

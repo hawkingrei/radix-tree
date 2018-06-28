@@ -7,18 +7,18 @@ use std::mem;
 
 pub struct Node4<K, T>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
     keys: Vec<K>,
     children: Vec<ArtNode<K, T>>,
-    marker: PhantomData<T>,
+    marker: PhantomData<ArtNode<K, T>>,
 }
 
 impl<K, V> ArtNodeTrait<K, V> for Node4<K, V>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
     fn new() -> Self {
@@ -94,7 +94,7 @@ where
 
 impl<K, V> Drop for Node4<K, V>
 where
-    K: Default + PartialEq + for<'a> Digital<'a>,
+    K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
     fn drop(&mut self) {
