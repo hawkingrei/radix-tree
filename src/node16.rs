@@ -10,7 +10,7 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: Vec<K>,
+    keys: Vec<u8>,
     children: Vec<ArtNode<K, T>>,
     marker: PhantomData<K>,
 }
@@ -23,7 +23,7 @@ where
     fn new() -> Self {
         Node16 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(K; Default::default(); 16),
+            keys: rep_no_copy!(u8; 0; 16),
             children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16),
             marker: Default::default(),
         }

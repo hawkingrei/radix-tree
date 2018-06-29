@@ -11,7 +11,7 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: Vec<K>,
+    keys: Vec<u8>,
     children: Vec<ArtNode<K, T>>,
     marker: PhantomData<ArtNode<K, T>>,
 }
@@ -24,7 +24,7 @@ where
     fn new() -> Self {
         Node4 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(K; Default::default(); 4),
+            keys: rep_no_copy!(u8; 0u8; 4),
             children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 4),
             marker: Default::default(),
         }
@@ -56,7 +56,7 @@ where
         }
         let key = byte.to_le().to_bytes()[level];
         let mut index = 0;
-        let mut result: Option<u8>;
+        let mut result: Option<u8> = None;
         for rkey in self.keys.iter() {
             if index + 1 <= self.header.num_children {
                 result = None;
@@ -72,12 +72,13 @@ where
         }
         match result {
             Some(index) => {
-                let next_node = self.children.get(index as usize);
+                let next_node = self.children.get_mut(index as usize);
                 loop {
                     match self.header.read_lock_or_restart() {
                         Ok(ver) => if version == ver {
                             match next_node {
                                 None => return &mut Err(true),
+                                Some(mut nd) => return &mut Ok(nd),
                             }
                         } else {
                             return &mut Err(true);
