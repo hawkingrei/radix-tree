@@ -40,8 +40,8 @@ where
         level: usize,
         parent: ArtNode<K, V>,
         version_parent: usize,
-    ) -> &mut Result<&mut ArtNode<K, V>, bool> {
-        return &mut Err(false);
+    ) -> Result<&mut ArtNode<K, V>, bool> {
+        return Err(false);
     }
 }
 

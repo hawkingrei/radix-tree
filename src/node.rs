@@ -199,7 +199,7 @@ where
         level: usize,
         parent: ArtNode<K, V>,
         version_parent: usize,
-    ) -> &mut Result<&mut ArtNode<K, V>, bool>;
+    ) -> Result<&mut ArtNode<K, V>, bool>;
 
     //#[inline]
     //fn find_child(&self, byte: u8) -> Option<&ArtNode<K, V>>;

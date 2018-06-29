@@ -45,13 +45,13 @@ where
         level: usize,
         parent: ArtNode<K, V>,
         version_parent: usize,
-    ) -> &mut Result<&mut ArtNode<K, V>, bool> {
+    ) -> Result<&mut ArtNode<K, V>, bool> {
         let mut version = 0;
         loop {
             match self.header.read_lock_or_restart() {
                 Ok(ver) => version = ver,
                 Err(true) => continue,
-                Err(false) => return &mut Err((false)),
+                Err(false) => return Err((false)),
             }
         }
         let key = byte.to_le().to_bytes()[level];
@@ -62,13 +62,11 @@ where
                 result = None;
                 break;
             }
-            unsafe {
-                if *rkey == key {
-                    result = Some(key);
-                    break;
-                }
-                index += 1;
-            };
+            if *rkey == key {
+                result = Some(key);
+                break;
+            }
+            index += 1;
         }
         match result {
             Some(index) => {
@@ -77,18 +75,18 @@ where
                     match self.header.read_lock_or_restart() {
                         Ok(ver) => if version == ver {
                             match next_node {
-                                None => return &mut Err(true),
-                                Some(mut nd) => return &mut Ok(nd),
+                                None => return Err(true),
+                                Some(mut nd) => return Ok(nd),
                             }
                         } else {
-                            return &mut Err(true);
+                            return Err(true);
                         },
                         Err(true) => continue,
-                        Err(false) => return &mut Err(false),
+                        Err(false) => return Err(false),
                     }
                 }
             }
-            None => return &mut Err(false),
+            None => return Err(false),
         }
     }
 }
