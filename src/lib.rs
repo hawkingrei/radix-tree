@@ -1,4 +1,6 @@
 #![feature(int_to_from_bytes)]
+#![feature(stdsimd)]
+#![feature(core_intrinsics)]
 extern crate crossbeam_epoch;
 extern crate crossbeam_utils;
 #[cfg(feature = "use_std")]

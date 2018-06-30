@@ -1,8 +1,15 @@
 use internal::Digital;
 use node;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use std::arch::x86_64::__m128i;
+use std::arch::x86_64::_mm_cmpeq_epi8;
+use std::arch::x86_64::_mm_movemask_epi8;
+use std::arch::x86_64::_mm_set1_epi8;
 use std::cmp::PartialEq;
+use std::intrinsics::cttz;
 use std::marker::PhantomData;
+use std::simd::i8x16;
+use std::simd::FromBits;
 
 pub struct Node16<K, T>
 where
@@ -43,7 +50,69 @@ where
         parent: ArtNode<K, V>,
         version_parent: usize,
     ) -> Result<&mut ArtNode<K, V>, bool> {
-        return Err(false);
+        let mut version = 0;
+        loop {
+            match self.header.read_lock_or_restart() {
+                Ok(ver) => version = ver,
+                Err(true) => continue,
+                Err(false) => return Err((false)),
+            }
+        }
+        let key = byte.to_le().to_bytes()[level];
+        let mut index = 0;
+
+        let raw_node_key = i8x16::new(
+            *self.keys.get(0).unwrap() as i8,
+            *self.keys.get(1).unwrap() as i8,
+            *self.keys.get(2).unwrap() as i8,
+            *self.keys.get(3).unwrap() as i8,
+            *self.keys.get(4).unwrap() as i8,
+            *self.keys.get(5).unwrap() as i8,
+            *self.keys.get(6).unwrap() as i8,
+            *self.keys.get(7).unwrap() as i8,
+            *self.keys.get(8).unwrap() as i8,
+            *self.keys.get(9).unwrap() as i8,
+            *self.keys.get(10).unwrap() as i8,
+            *self.keys.get(11).unwrap() as i8,
+            *self.keys.get(12).unwrap() as i8,
+            *self.keys.get(13).unwrap() as i8,
+            *self.keys.get(14).unwrap() as i8,
+            *self.keys.get(15).unwrap() as i8,
+        );
+        let mut result: Option<u8>;
+        unsafe {
+            let node_key: __m128i = FromBits::from_bits(raw_node_key);
+            let key = _mm_set1_epi8(key as i8);
+            let cmp = _mm_cmpeq_epi8(key, node_key);
+            let mask = (1 << 16) - 1;
+            let index = _mm_movemask_epi8(cmp) & mask;
+            result = if index == 0 {
+                None
+            } else {
+                Some(index as u8 - 1)
+            };
+        }
+
+        match result {
+            Some(index) => {
+                let next_node = self.children.get_mut(index as usize);
+                loop {
+                    match self.header.read_lock_or_restart() {
+                        Ok(ver) => if version == ver {
+                            match next_node {
+                                None => return Err(true),
+                                Some(mut nd) => return Ok(nd),
+                            }
+                        } else {
+                            return Err(true);
+                        },
+                        Err(true) => continue,
+                        Err(false) => return Err(false),
+                    }
+                }
+            }
+            None => return Err(false),
+        }
     }
 }
 
