@@ -58,6 +58,9 @@ where
         let result = self.keys.get(key as usize);
         match result {
             Some(index) => {
+                if *index == 0 {
+                    return Err(false);
+                }
                 let next_node = self.children.get_mut(*index as usize);
                 loop {
                     match self.header.read_lock_or_restart() {
