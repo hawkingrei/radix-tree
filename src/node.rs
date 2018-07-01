@@ -65,6 +65,10 @@ impl NodeHeader {
         }
     }
 
+    pub fn get_partial_len(&self) -> usize {
+        self.partial_len
+    }
+
     #[inline]
     pub fn read_version(&self) -> usize {
         return self.version.load(Ordering::SeqCst);

@@ -54,7 +54,13 @@ where
                 Err(false) => return Err((false)),
             }
         }
-        let key = byte.to_le().to_bytes()[level];
+
+        let key = if self.header.get_partial_len() == 0 {
+            byte.to_le().to_bytes()[level]
+        } else {
+            byte.to_le().to_bytes()[level + self.header.get_partial_len()]
+        };
+
         let mut index = 0;
         let mut result: Option<u8> = None;
         for rkey in self.keys.iter() {

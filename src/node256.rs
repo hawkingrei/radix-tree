@@ -52,7 +52,12 @@ where
                 Err(false) => return Err((false)),
             }
         }
-        let index = byte.to_le().to_bytes()[level];
+        let index = if self.header.get_partial_len() == 0 {
+            byte.to_le().to_bytes()[level]
+        } else {
+            byte.to_le().to_bytes()[level + self.header.get_partial_len()]
+        };
+
         let next_node = self.children.get_mut(index as usize);
         loop {
             match self.header.read_lock_or_restart() {
