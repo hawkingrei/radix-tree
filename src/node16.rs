@@ -83,7 +83,7 @@ where
             *self.keys.get(14).unwrap() as i8,
             *self.keys.get(15).unwrap() as i8,
         );
-        let mut result: Option<u8>;
+        let result: Option<u8>;
         unsafe {
             let node_key: __m128i = FromBits::from_bits(raw_node_key);
             let key = _mm_set1_epi8(key as i8);
