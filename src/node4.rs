@@ -4,6 +4,7 @@ use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::mem;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 pub struct Node4<K, T>
 where
@@ -11,7 +12,7 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: Vec<u8>,
+    keys: Vec<AtomicU8>,
     children: Vec<ArtNode<K, T>>,
     marker: PhantomData<ArtNode<K, T>>,
 }
@@ -24,7 +25,7 @@ where
     fn new() -> Self {
         Node4 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(u8; 0u8; 4),
+            keys: rep_no_copy!(AtomicU8; AtomicU8::new(0); 4),
             children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 4),
             marker: Default::default(),
         }
@@ -68,7 +69,7 @@ where
                 result = None;
                 break;
             }
-            if *rkey == key {
+            if rkey.load(Ordering::Relaxed) == key {
                 result = Some(key);
                 break;
             }
