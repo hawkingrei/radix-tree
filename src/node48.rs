@@ -3,6 +3,7 @@ use node;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 pub struct Node48<K, T>
 where
@@ -10,7 +11,7 @@ where
     T: 'static + Send + Sync,
 {
     header: NodeHeader,
-    keys: Vec<u8>,
+    keys: Vec<AtomicU8>,
     children: Vec<ArtNode<K, T>>,
     marker: PhantomData<T>,
 }
@@ -23,7 +24,7 @@ where
     fn new() -> Self {
         Node48 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(u8; 0; 256),
+            keys: rep_no_copy!(AtomicU8; AtomicU8::new(0); 256),
             children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48),
             marker: Default::default(),
         }
@@ -62,10 +63,11 @@ where
         let result = self.keys.get(key as usize);
         match result {
             Some(index) => {
-                if *index == 0 {
+                let id = index.load(Ordering::Relaxed);
+                if id == 0 {
                     return Err(false);
                 }
-                let next_node = self.children.get_mut(*index as usize);
+                let next_node = self.children.get_mut(id as usize);
                 loop {
                     match self.header.read_lock_or_restart() {
                         Ok(ver) => if version == ver {
