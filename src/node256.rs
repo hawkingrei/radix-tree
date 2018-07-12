@@ -1,5 +1,6 @@
 use internal::Digital;
 use node;
+use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
@@ -73,6 +74,10 @@ where
                 Err(false) => return Err(false),
             }
         }
+    }
+
+    fn insertAndUnlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool) {
+        return (Empty, false);
     }
 }
 
