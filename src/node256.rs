@@ -79,6 +79,10 @@ where
     fn insertAndUnlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool) {
         return (Empty, false);
     }
+
+    fn change(&mut self, key: u8, val: ArtNode<K, V>) -> bool {
+        return false;
+    }
 }
 
 impl<K, V> Drop for Node256<K, V>
