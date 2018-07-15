@@ -1,4 +1,5 @@
 use internal::Digital;
+use node::ArtNodeTrait;
 use node::{ArtKey, ArtNode};
 use std::marker::PhantomData;
 
@@ -41,6 +42,8 @@ where
     }
 
     fn insert(&mut self, key: u64, value: T) {
-        if matches!(self.head, ArtNode::Empty) {}
+        if matches!(self.head, ArtNode::Empty) {
+            self.head = ArtNode::Inner4(Box::new(ArtNodeTrait::new()));
+        }
     }
 }
