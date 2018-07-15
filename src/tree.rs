@@ -10,7 +10,6 @@ where
 {
     head: ArtNode<K, V>,
     size: usize,
-    level: usize,
     phantom: PhantomData<K>,
 }
 
@@ -22,7 +21,6 @@ where
     fn default() -> Self {
         Radix {
             head: ArtNode::Empty,
-            level: 0,
             size: 0,
             phantom: Default::default(),
         }
@@ -37,9 +35,12 @@ where
     fn new(level: usize) -> Self {
         Radix {
             head: ArtNode::Empty,
-            level: level,
             size: 0,
             phantom: Default::default(),
         }
+    }
+
+    fn insert(&mut self, key: u64, value: T) {
+        if matches!(self.head, ArtNode::Empty) {}
     }
 }

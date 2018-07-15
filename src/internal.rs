@@ -9,6 +9,16 @@ macro_rules! rep_no_copy {
     }};
 }
 
+#[macro_export]
+macro_rules! matches {
+    ($e:expr, $p:pat) => {
+        match $e {
+            $p => true,
+            _ => false,
+        }
+    };
+}
+
 pub trait Digital {
     // TODO: consider providing a more efficient interface here (e.g. passing a slice directly)
     type I: Iterator<Item = u8>;
