@@ -2,6 +2,7 @@ use internal::Digital;
 use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use node256::Node256;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicU8, Ordering};
@@ -96,8 +97,8 @@ where
         return false;
     }
 
-    fn grow(&self) -> Result<ArtNode<K, V>> {
-        return Ok(ArtNode::Inner256(Box::new(Node256::new())));
+    fn grow(&self) -> Option<ArtNode<K, V>> {
+        return Some(ArtNode::Inner256(Box::new(Node256::new())));
     }
 }
 

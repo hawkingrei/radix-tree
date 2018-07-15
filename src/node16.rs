@@ -2,6 +2,7 @@ use internal::Digital;
 use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use node48::Node48;
 use std::arch::x86_64::__m128i;
 use std::arch::x86_64::_mm_cmpeq_epi8;
 use std::arch::x86_64::_mm_movemask_epi8;
@@ -128,8 +129,8 @@ where
         return false;
     }
 
-    fn grow(&self) -> Result<ArtNode<K, V>> {
-        return Ok(ArtNode::Inner48(Box::new(Node48::new())));
+    fn grow(&self) -> Option<ArtNode<K, V>> {
+        return Some(ArtNode::Inner48(Box::new(Node48::new())));
     }
 }
 

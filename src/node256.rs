@@ -84,8 +84,8 @@ where
         return false;
     }
 
-    fn grow(&self) -> Result<ArtNode<K, V>> {
-        return Err();
+    fn grow(&self) -> Option<ArtNode<K, V>> {
+        return None;
     }
 }
 

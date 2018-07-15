@@ -2,6 +2,7 @@ use internal::Digital;
 use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use node16::Node16;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::mem;
@@ -106,8 +107,8 @@ where
         return false;
     }
 
-    fn grow(&self) -> Result<ArtNode<K, V>> {
-        return Ok(ArtNode::Inner16(Box::new(Node16::new())));
+    fn grow(&self) -> Option<ArtNode<K, V>> {
+        return Some(ArtNode::Inner16(Box::new(Node16::new())));
     }
 }
 
