@@ -127,6 +127,10 @@ where
     fn change(&mut self, key: u8, val: ArtNode<K, V>) -> bool {
         return false;
     }
+
+    fn grow(&self) -> Result<ArtNode<K, V>> {
+        return Ok(ArtNode::Inner48(Box::new(Node48::new())));
+    }
 }
 
 impl<K, V> Drop for Node16<K, V>
