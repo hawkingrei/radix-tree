@@ -12,10 +12,10 @@ where
     K: Default + PartialEq + Digital,
     T: 'static + Send + Sync,
 {
-    header: NodeHeader,
-    keys: Vec<AtomicU8>,
-    children: Vec<ArtNode<K, T>>,
-    marker: PhantomData<T>,
+    pub header: NodeHeader,
+    pub keys: Vec<AtomicU8>,
+    pub children: Vec<ArtNode<K, T>>,
+    pub marker: PhantomData<T>,
 }
 
 impl<K, V> ArtNodeTrait<K, V> for Node48<K, V>
@@ -107,6 +107,13 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
+    fn grow(&self) -> Node256<K, V> {
+        return Node256 {
+            header: NodeHeader::new(),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
+            marker: Default::default(),
+        };
+    }
 }
 
 impl<K, V> Drop for Node48<K, V>

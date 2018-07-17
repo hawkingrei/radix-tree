@@ -10,9 +10,9 @@ where
     K: Default + PartialEq + Digital,
     T: 'static + Send + Sync,
 {
-    header: NodeHeader,
-    children: Vec<ArtNode<K, T>>,
-    marker: PhantomData<T>,
+    pub header: NodeHeader,
+    pub children: Vec<ArtNode<K, T>>,
+    pub marker: PhantomData<T>,
 }
 
 impl<K, V> ArtNodeTrait<K, V> for Node256<K, V>
