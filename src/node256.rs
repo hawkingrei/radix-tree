@@ -83,6 +83,10 @@ where
     fn change(&mut self, key: u8, val: ArtNode<K, V>) -> bool {
         return false;
     }
+
+    fn grow(&self) -> Option<ArtNode<K, V>> {
+        return None;
+    }
 }
 
 impl<K, V> Node256<K, V>
