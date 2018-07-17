@@ -39,6 +39,7 @@ pub trait ArtKey {
     fn bytes(&self) -> &[u8];
 }
 
+#[derive(Clone)]
 pub struct NodeHeader {
     //NodeType: NodeType,
     version: Arc<AtomicUsize>, // unlock 0, lock 1
