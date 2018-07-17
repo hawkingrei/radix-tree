@@ -97,6 +97,13 @@ where
     }
 }
 
+impl<K, V> Node48<K, V>
+where
+    K: Default + PartialEq + Digital,
+    V: 'static + Send + Sync,
+{
+}
+
 impl<K, V> Drop for Node48<K, V>
 where
     K: Default + PartialEq + Digital,

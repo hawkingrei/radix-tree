@@ -85,6 +85,13 @@ where
     }
 }
 
+impl<K, V> Node256<K, V>
+where
+    K: Default + PartialEq + Digital,
+    V: 'static + Send + Sync,
+{
+}
+
 impl<K, V> Drop for Node256<K, V>
 where
     K: Default + PartialEq + Digital,
