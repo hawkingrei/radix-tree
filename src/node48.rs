@@ -109,7 +109,7 @@ where
 {
     fn grow(&self) -> Node256<K, V> {
         return Node256 {
-            header: NodeHeader::new(),
+            header: self.header.clone(),
             children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
             marker: Default::default(),
         };

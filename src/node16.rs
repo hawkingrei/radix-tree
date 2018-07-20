@@ -12,6 +12,7 @@ use std::intrinsics::cttz;
 use std::marker::PhantomData;
 use std::simd::i8x16;
 use std::simd::FromBits;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 pub struct Node16<K, T>
 where
@@ -139,6 +140,14 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
+    fn grow(&self) -> Node48<K, V> {
+        return Node48 {
+            header: self.header.clone(),
+            keys: rep_no_copy!(AtomicU8; AtomicU8::new(0); 256),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
+            marker: Default::default(),
+        };
+    }
 }
 
 impl<K, V> Drop for Node16<K, V>
