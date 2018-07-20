@@ -3,6 +3,7 @@ use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use node16::Node16;
+use node48::Node48;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::mem;
@@ -117,6 +118,14 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
+    fn grow(&self) -> Node16<K, V> {
+        return Node16 {
+            header: NodeHeader::new(),
+            keys: rep_no_copy!(u8; 0; 16),
+            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16),
+            marker: Default::default(),
+        };
+    }
 }
 
 impl<K, V> Drop for Node4<K, V>
