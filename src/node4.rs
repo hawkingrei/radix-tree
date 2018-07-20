@@ -120,7 +120,7 @@ where
 {
     fn grow(&self) -> Node16<K, V> {
         return Node16 {
-            header: NodeHeader::new(),
+            header: self.header.clone(),
             keys: rep_no_copy!(u8; 0; 16),
             children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16),
             marker: Default::default(),
