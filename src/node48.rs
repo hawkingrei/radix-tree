@@ -2,6 +2,7 @@ use internal::Digital;
 use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use node16::Node16;
 use node256::Node256;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
@@ -107,10 +108,48 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
-    fn grow(&self) -> Node256<K, V> {
+    fn grow(&mut self) -> Node256<K, V> {
+        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256);
+        for index in 0..255 {
+            let cindex = self
+                .keys
+                .get(index as usize)
+                .unwrap()
+                .load(Ordering::Relaxed);
+            if cindex != 0 {
+                let mut _c = children.get_mut(index as usize).unwrap();
+                _c = self.children.get_mut(cindex as usize).unwrap();
+            }
+        }
         return Node256 {
             header: self.header.clone(),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
+            children: children,
+            marker: Default::default(),
+        };
+    }
+
+    fn downgrade(&mut self) -> Node16<K, V> {
+        let mut keys: Vec<u8> = Vec::with_capacity(16);
+        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16);
+        let mut new_children_index = 0;
+        for index in 0..255 {
+            let cindex = self
+                .keys
+                .get(index as usize)
+                .unwrap()
+                .load(Ordering::Relaxed);
+            if cindex != 0 {
+                keys.push(index as u8);
+
+                let mut _c = children.get_mut(new_children_index as usize).unwrap();
+                _c = self.children.get_mut(cindex as usize).unwrap();
+                new_children_index += 1;
+            }
+        }
+        return Node16 {
+            header: self.header.clone(),
+            keys: keys,
+            children: children,
             marker: Default::default(),
         };
     }

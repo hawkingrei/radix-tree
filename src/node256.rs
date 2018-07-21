@@ -2,8 +2,10 @@ use internal::Digital;
 use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use node48::Node48;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
+use std::sync::atomic::{AtomicU8, Ordering};
 
 pub struct Node256<K, T>
 where
@@ -94,6 +96,30 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
+    fn downgrade(&mut self) -> Node48<K, V> {
+        let mut keys = rep_no_copy!(AtomicU8; AtomicU8::new(0); 256);
+        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48);
+        let mut new_children_index = 0;
+        for index in 0..255 {
+            match self.children.get(index as usize).unwrap() {
+                ArtNode::Empty => continue,
+                _ => {
+                    let mut _k = keys.get_mut(index).unwrap();
+                    _k.store(new_children_index as u8, Ordering::Relaxed);
+
+                    let mut _c = children.get_mut(new_children_index as usize).unwrap();
+                    _c = self.children.get_mut(index as usize).unwrap();
+                    new_children_index += new_children_index;
+                }
+            }
+        }
+        return Node48 {
+            header: NodeHeader::new(),
+            keys: keys,
+            children: children,
+            marker: Default::default(),
+        };
+    }
 }
 
 impl<K, V> Drop for Node256<K, V>

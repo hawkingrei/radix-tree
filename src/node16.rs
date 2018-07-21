@@ -2,6 +2,7 @@ use internal::Digital;
 use node;
 use node::ArtNode::Empty;
 use node::{ArtNode, ArtNodeTrait, NodeHeader};
+use node4::Node4;
 use node48::Node48;
 use std::arch::x86_64::__m128i;
 use std::arch::x86_64::_mm_cmpeq_epi8;
@@ -140,11 +141,49 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
-    fn grow(&self) -> Node48<K, V> {
+    fn grow(&mut self) -> Node48<K, V> {
+        let mut keys = rep_no_copy!(AtomicU8; AtomicU8::new(0); 256);
+        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48);
+        let mut new_children_index = 0;
+        for index in 0..self.header.num_children - 1 {
+            let new_index = self.keys.get(index as usize).unwrap();
+            let mut _key = keys.get_mut(*new_index as usize).unwrap();
+            _key.store(new_children_index, Ordering::Relaxed);
+
+            let mut _c = children.get_mut(new_children_index as usize).unwrap();
+            _c = self.children.get_mut(index as usize).unwrap();
+
+            new_children_index += 1
+        }
         return Node48 {
             header: self.header.clone(),
-            keys: rep_no_copy!(AtomicU8; AtomicU8::new(0); 256),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
+            keys: keys,
+            children: children,
+            marker: Default::default(),
+        };
+    }
+
+    fn downgrade(&mut self) -> Node4<K, V> {
+        let mut keys = rep_no_copy!(AtomicU8; AtomicU8::new(0); 4);
+        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 4);
+        let mut new_children_index = 0;
+        for index in 0..15 {
+            match self.children.get(index as usize).unwrap() {
+                ArtNode::Empty => continue,
+                _ => {
+                    let mut _k = keys.get_mut(index).unwrap();
+                    _k.store(new_children_index as u8, Ordering::Relaxed);
+
+                    let mut _c = children.get_mut(new_children_index as usize).unwrap();
+                    _c = self.children.get_mut(index as usize).unwrap();
+                    new_children_index += new_children_index;
+                }
+            }
+        }
+        return Node4 {
+            header: self.header.clone(),
+            keys: keys,
+            children: children,
             marker: Default::default(),
         };
     }

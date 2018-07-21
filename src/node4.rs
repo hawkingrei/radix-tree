@@ -118,13 +118,27 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
-    fn grow(&self) -> Node16<K, V> {
-        return Node16 {
+    fn grow(&mut self) -> Node16<K, V> {
+        let mut keys: Vec<u8> = Vec::with_capacity(16);
+        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16);
+        for index in 0..self.header.num_children {
+            keys.push(
+                self.keys
+                    .get(index as usize)
+                    .unwrap()
+                    .load(Ordering::Relaxed)
+                    .clone(),
+            );
+            let mut _c = children.get_mut(index as usize).unwrap();
+            _c = self.children.get_mut(index as usize).unwrap();
+        }
+        let mut n = Node16 {
             header: self.header.clone(),
-            keys: rep_no_copy!(u8; 0; 16),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16),
+            keys: keys,
+            children: children,
             marker: Default::default(),
         };
+        n
     }
 }
 
