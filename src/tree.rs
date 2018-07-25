@@ -42,8 +42,8 @@ where
     }
 
     fn insert(&mut self, key: u64, value: T) {
-        let mut parentKey = 0;
-        let mut nodeKey = 0;
+        let mut parentKey :u8 = 0;
+        let mut nodeKey :u8= 0;
         if matches!(self.head, ArtNode::Empty) {
             self.head = ArtNode::Inner4(Box::new(ArtNodeTrait::new()));
         }
