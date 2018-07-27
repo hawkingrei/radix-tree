@@ -109,7 +109,7 @@ where
     }
 
     fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner16(Box::new(Node16::new())));
+        return Some(ArtNode::Inner16(Node16::new()));
     }
 }
 
