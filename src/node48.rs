@@ -8,6 +8,7 @@ use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::mem;
+use std::ptr;
 use std::mem::ManuallyDrop;
 
 pub struct Node48<K, T>
@@ -131,9 +132,11 @@ where
     }
 
     fn downgrade(&mut self) -> Node16<K, V> {
-        let mut keys: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
+        //let mut keys: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
+        let mut keys: Vec<u8> = Vec::with_capacity(16);
         let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
         let mut new_children_index = 0;
+        let mut k : mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
         for index in 0..255 {
             let cindex = self
                 .keys
@@ -148,9 +151,16 @@ where
                 new_children_index += 1;
             }
         }
+        unsafe {
+            ptr::copy_nonoverlapping(
+                keys.as_mut_ptr(),
+                k.as_mut_ptr(),
+                16);
+        }
+
         return Node16 {
             header: self.header.clone(),
-            keys: keys,
+            keys: k,
             children: children,
             marker: Default::default(),
         };
