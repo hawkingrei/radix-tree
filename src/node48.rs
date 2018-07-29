@@ -101,7 +101,7 @@ where
     }
 
     fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner256(Box::new(Node256::new())));
+        return Some(ArtNode::Inner256(Node256::new()));
     }
 }
 
