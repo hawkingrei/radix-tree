@@ -12,9 +12,11 @@ use std::cmp::PartialEq;
 use std::intrinsics::cttz;
 use std::marker::PhantomData;
 use std::mem;
+use std::mem::ManuallyDrop;
 use std::simd::i8x16;
 use std::simd::FromBits;
 use std::sync::atomic::{AtomicU8, Ordering};
+
 
 pub struct Node16<K, T>
 where
@@ -133,7 +135,7 @@ where
     }
 
     fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner48(Node48::new()));
+        return Some(ArtNode::Inner48(Box::new(Node48::new())));
     }
 }
 
@@ -143,8 +145,8 @@ where
     V: 'static + Send + Sync,
 {
     fn grow(&mut self) -> Node48<K, V> {
-        let mut keys = rep_no_copy!(AtomicU8; AtomicU8::new(0); 256);
-        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48);
+        let mut keys = unsafe { make_array!(256, AtomicU8::new(0)) };
+        let mut children = unsafe { ManuallyDrop::new(make_array!(48, ArtNode::Empty)) };
         let mut new_children_index = 0;
         for index in 0..self.header.num_children - 1 {
             let new_index = self.keys.get(index as usize).unwrap();
@@ -165,8 +167,8 @@ where
     }
 
     fn downgrade(&mut self) -> Node4<K, V> {
-        let mut keys = rep_no_copy!(AtomicU8; AtomicU8::new(0); 4);
-        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 4);
+        let mut keys:[AtomicU8; 256] = unsafe { mem::uninitialized() };
+        let mut children : mem::ManuallyDrop<[ArtNode<K, V>; 48]>= unsafe { mem::uninitialized() };
         let mut new_children_index = 0;
         for index in 0..15 {
             match self.children.get(index as usize).unwrap() {

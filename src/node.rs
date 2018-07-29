@@ -24,10 +24,10 @@ where
 {
     Empty,
 
-    Inner4(Node4<K, V>),
-    Inner16(Node16<K, V>),
-    Inner48(Node48<K, V>),
-    Inner256(Node256<K, V>),
+    Inner4(Box<Node4<K, V>>),
+    Inner16(Box<Node16<K, V>>),
+    Inner48(Box<Node48<K, V>>),
+    Inner256(Box<Node256<K, V>>),
     Value(usize),
     //LeafLarge(Box<(K, V)>),
     //LeafLargeKey(Box<K>, SmallStruct<V>),

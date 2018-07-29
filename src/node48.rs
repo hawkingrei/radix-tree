@@ -101,7 +101,7 @@ where
     }
 
     fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner256(Node256::new()));
+        return Some(ArtNode::Inner256(Box::new(Node256::new())));
     }
 }
 
@@ -111,7 +111,7 @@ where
     V: 'static + Send + Sync,
 {
     fn grow(&mut self) -> Node256<K, V> {
-        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256);
+        let mut children = unsafe { make_array!(256, ArtNode::Empty) };
         for index in 0..255 {
             let cindex = self
                 .keys
@@ -131,8 +131,8 @@ where
     }
 
     fn downgrade(&mut self) -> Node16<K, V> {
-        let mut keys: Vec<u8> = Vec::with_capacity(16);
-        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16);
+        let mut keys: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
+        let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
         let mut new_children_index = 0;
         for index in 0..255 {
             let cindex = self

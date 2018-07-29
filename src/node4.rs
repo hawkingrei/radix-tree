@@ -7,6 +7,7 @@ use node48::Node48;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::mem;
+use std::mem::ManuallyDrop;
 use std::sync::atomic::{AtomicU8, Ordering};
 
 pub struct Node4<K, T>
@@ -109,7 +110,7 @@ where
     }
 
     fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner16(Node16::new()));
+        return Some(ArtNode::Inner16(Box::new(Node16::new())));
     }
 }
 
@@ -119,8 +120,8 @@ where
     V: 'static + Send + Sync,
 {
     fn grow(&mut self) -> Node16<K, V> {
-        let mut keys: Vec<u8> = Vec::with_capacity(16);
-        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16);
+        let mut keys: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
+        let mut children:  mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
         for index in 0..self.header.num_children {
             keys.push(
                 self.keys

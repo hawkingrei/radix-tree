@@ -5,6 +5,7 @@ use node::{ArtNode, ArtNodeTrait, NodeHeader};
 use node48::Node48;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
+use std::mem::ManuallyDrop;
 use std::sync::atomic::{AtomicU8, Ordering};
 
 pub struct Node256<K, T>
@@ -97,8 +98,8 @@ where
     V: 'static + Send + Sync,
 {
     fn downgrade(&mut self) -> Node48<K, V> {
-        let mut keys = rep_no_copy!(AtomicU8; AtomicU8::new(0); 256);
-        let mut children = rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48);
+        let mut keys = unsafe { make_array!(256, AtomicU8::new(0)) };
+        let mut children = unsafe { ManuallyDrop::new(make_array!(48, ArtNode::Empty)) };
         let mut new_children_index = 0;
         for index in 0..255 {
             match self.children.get(index as usize).unwrap() {

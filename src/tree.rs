@@ -46,7 +46,7 @@ where
         let mut parentKey: u8 = 0;
         let mut nodeKey: u8 = 0;
         if matches!(self.head, ArtNode::Empty) {
-            self.head = Box::new(ArtNode::Inner4(ArtNodeTrait::new()));
+            self.head = Box::new(ArtNode::Inner4(Box::new(ArtNodeTrait::new())));
         }
         let mut node: Box<ArtNode<K, T>> = Box::new(ArtNode::Empty);
         //let mut nextNode: Box<ArtNode<K, T>> = self.head;
