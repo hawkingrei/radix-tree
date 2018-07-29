@@ -15,8 +15,8 @@ where
     T: 'static + Send + Sync,
 {
     pub header: NodeHeader,
-    pub keys: Vec<AtomicU8>,
-    pub children: Vec<ArtNode<K, T>>,
+    pub keys: [AtomicU8; 256],
+    pub children: mem::ManuallyDrop<[ArtNode<K, T>; 48]>,
     pub marker: PhantomData<ArtNode<K, T>>,
 }
 
@@ -28,8 +28,8 @@ where
     fn new() -> Self {
         Node4 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(AtomicU8; AtomicU8::new(0); 4),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 4),
+            keys: unsafe { mem::uninitialized() },
+            children: unsafe { mem::uninitialized() },
             marker: Default::default(),
         }
     }

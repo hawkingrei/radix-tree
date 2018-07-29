@@ -1,4 +1,5 @@
 #![feature(core_intrinsics)]
+#![feature(extern_prelude)]
 #![feature(integer_atomics)]
 #![feature(int_to_from_bytes)]
 #![feature(stdsimd)]

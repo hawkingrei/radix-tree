@@ -11,6 +11,7 @@ use std::arch::x86_64::_mm_set1_epi8;
 use std::cmp::PartialEq;
 use std::intrinsics::cttz;
 use std::marker::PhantomData;
+use std::mem;
 use std::simd::i8x16;
 use std::simd::FromBits;
 use std::sync::atomic::{AtomicU8, Ordering};
@@ -21,8 +22,8 @@ where
     T: 'static + Send + Sync,
 {
     pub header: NodeHeader,
-    pub keys: Vec<u8>,
-    pub children: Vec<ArtNode<K, T>>,
+    pub keys: mem::ManuallyDrop<[u8; 16]>,
+    pub children: mem::ManuallyDrop<[ArtNode<K, T>; 16]>,
     pub marker: PhantomData<K>,
 }
 
@@ -34,8 +35,8 @@ where
     fn new() -> Self {
         Node16 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(u8; 0; 16),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 16),
+            keys: unsafe { mem::uninitialized() },
+            children:  unsafe { mem::uninitialized() },
             marker: Default::default(),
         }
     }

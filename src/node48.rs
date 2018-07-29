@@ -7,6 +7,8 @@ use node256::Node256;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicU8, Ordering};
+use std::mem;
+use std::mem::ManuallyDrop;
 
 pub struct Node48<K, T>
 where
@@ -14,8 +16,8 @@ where
     T: 'static + Send + Sync,
 {
     pub header: NodeHeader,
-    pub keys: Vec<AtomicU8>,
-    pub children: Vec<ArtNode<K, T>>,
+    pub keys: [AtomicU8; 256],
+    pub children: mem::ManuallyDrop<[ArtNode<K, T>; 48]>,
     pub marker: PhantomData<T>,
 }
 
@@ -27,8 +29,8 @@ where
     fn new() -> Self {
         Node48 {
             header: NodeHeader::new(),
-            keys: rep_no_copy!(AtomicU8; AtomicU8::new(0); 256),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty; 48),
+            keys:  unsafe { make_array!(256, AtomicU8::new(0)) },
+            children: unsafe { ManuallyDrop::new(make_array!(48, ArtNode::Empty)) },
             marker: Default::default(),
         }
     }

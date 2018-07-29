@@ -19,6 +19,17 @@ macro_rules! matches {
     };
 }
 
+#[macro_export]
+macro_rules! make_array {
+    ($n:expr, $constructor:expr) => {{
+        let mut items: [_; $n] = std::mem::uninitialized();
+        for place in items.iter_mut() {
+            std::ptr::write(place, $constructor);
+        }
+        items
+    }}
+}
+
 pub trait Digital {
     // TODO: consider providing a more efficient interface here (e.g. passing a slice directly)
     type I: Iterator<Item = u8>;

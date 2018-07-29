@@ -13,7 +13,7 @@ where
     T: 'static + Send + Sync,
 {
     pub header: NodeHeader,
-    pub children: Vec<ArtNode<K, T>>,
+    pub children: [ArtNode<K, T>; 256],
     pub marker: PhantomData<T>,
 }
 
@@ -25,7 +25,7 @@ where
     fn new() -> Self {
         Node256 {
             header: NodeHeader::new(),
-            children: rep_no_copy!(ArtNode<K, V>; ArtNode::Empty;  256),
+            children: unsafe { make_array!(256, ArtNode::Empty) },
             marker: Default::default(),
         }
     }
