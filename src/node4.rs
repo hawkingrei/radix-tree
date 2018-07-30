@@ -6,8 +6,7 @@ use node16::Node16;
 use node48::Node48;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
-use std::mem;
-use std::ptr;
+use std::{mem,ptr};
 use std::mem::ManuallyDrop;
 use std::sync::atomic::{AtomicU8, Ordering};
 

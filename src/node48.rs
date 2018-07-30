@@ -7,8 +7,7 @@ use node256::Node256;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicU8, Ordering};
-use std::mem;
-use std::ptr;
+use std::{mem,ptr};
 use std::mem::ManuallyDrop;
 
 pub struct Node48<K, T>
