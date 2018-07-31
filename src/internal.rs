@@ -12,7 +12,7 @@ macro_rules! rep_no_copy {
 #[macro_export]
 macro_rules! matches {
     ($e:expr, $p:pat) => {
-        match *$e {
+        match $e {
             $p => true,
             _ => false,
         }
