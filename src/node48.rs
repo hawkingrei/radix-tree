@@ -103,6 +103,13 @@ where
     fn grow(&self) -> Option<ArtNode<K, V>> {
         return Some(ArtNode::Inner256(Box::new(Node256::new())));
     }
+
+    fn has_child(&self, byte: u8) -> bool {
+        match self.children[byte as usize] {
+            ArtNode::Empty => false,
+            _ => true,
+        }
+    }
 }
 
 impl<K, V> Node48<K, V>

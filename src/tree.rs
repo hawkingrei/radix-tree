@@ -51,9 +51,7 @@ where
         {
             unsafe {
                 let mut node: Box<ArtNode<K, T>> = Box::new(ArtNode::Empty);
-                let mut nextNode: Box<ArtNode<K, T>> = Box::new(self.head);
-
-                
+                let mut nextNode: Box<ArtNode<K, T>> = Box::new(self.head);               
                 loop {
                 }
             }
