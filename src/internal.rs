@@ -27,7 +27,7 @@ macro_rules! make_array {
             std::ptr::write(place, $constructor);
         }
         items
-    }}
+    }};
 }
 
 pub trait Digital {

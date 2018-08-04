@@ -52,11 +52,9 @@ where
             let mut node: ArtNode<K, T> = ArtNode::Empty;
             //let mut nextNode: ArtNode<K, T> = self.head;
 
-
             loop {
                 //node = nextNode
             }
         }
-       
     }
 }

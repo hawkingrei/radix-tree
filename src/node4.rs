@@ -6,9 +6,9 @@ use node16::Node16;
 use node48::Node48;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
-use std::{mem,ptr};
 use std::mem::ManuallyDrop;
 use std::sync::atomic::{AtomicU8, Ordering};
+use std::{mem, ptr};
 
 pub struct Node4<K, T>
 where
@@ -121,8 +121,8 @@ where
 {
     fn grow(&mut self) -> Node16<K, V> {
         let mut keys: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
-        let mut children:  mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
-        let mut old :Vec<u8> = Vec::with_capacity(self.header.num_children as usize);
+        let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
+        let mut old: Vec<u8> = Vec::with_capacity(self.header.num_children as usize);
         for index in 0..self.header.num_children {
             old.push(
                 self.keys
@@ -133,14 +133,8 @@ where
             );
         }
         unsafe {
-            ptr::copy_nonoverlapping(
-                old.as_mut_ptr(),
-                keys.as_mut_ptr(),
-                4);
-            ptr::copy_nonoverlapping(
-                self.children.as_mut_ptr(),
-                children.as_mut_ptr(),
-                4);
+            ptr::copy_nonoverlapping(old.as_mut_ptr(), keys.as_mut_ptr(), 4);
+            ptr::copy_nonoverlapping(self.children.as_mut_ptr(), children.as_mut_ptr(), 4);
         }
         let mut n = Node16 {
             header: self.header.clone(),

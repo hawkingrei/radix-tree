@@ -6,6 +6,7 @@ use node4::Node4;
 use node48::Node48;
 use std::arch::x86_64::__m128i;
 use std::arch::x86_64::_mm_cmpeq_epi8;
+use std::arch::x86_64::_mm_loadu_si128;
 use std::arch::x86_64::_mm_movemask_epi8;
 use std::arch::x86_64::_mm_set1_epi8;
 use std::cmp::PartialEq;
@@ -13,10 +14,7 @@ use std::intrinsics::cttz;
 use std::marker::PhantomData;
 use std::mem;
 use std::mem::ManuallyDrop;
-use std::simd::i8x16;
-use std::simd::FromBits;
 use std::sync::atomic::{AtomicU8, Ordering};
-
 
 pub struct Node16<K, T>
 where
@@ -38,7 +36,7 @@ where
         Node16 {
             header: NodeHeader::new(),
             keys: unsafe { mem::uninitialized() },
-            children:  unsafe { mem::uninitialized() },
+            children: unsafe { mem::uninitialized() },
             marker: Default::default(),
         }
     }
@@ -72,7 +70,7 @@ where
         };
         let mut index = 0;
 
-        let raw_node_key = i8x16::new(
+        let raw_node_key = [
             *self.keys.get(0).unwrap() as i8,
             *self.keys.get(1).unwrap() as i8,
             *self.keys.get(2).unwrap() as i8,
@@ -89,10 +87,10 @@ where
             *self.keys.get(13).unwrap() as i8,
             *self.keys.get(14).unwrap() as i8,
             *self.keys.get(15).unwrap() as i8,
-        );
+        ];
         let result: Option<u8>;
         unsafe {
-            let node_key: __m128i = FromBits::from_bits(raw_node_key);
+            let node_key: __m128i = _mm_loadu_si128(raw_node_key.as_ptr() as *const _);
             let key = _mm_set1_epi8(key as i8);
             let cmp = _mm_cmpeq_epi8(key, node_key);
             let mask = (1 << 16) - 1;
@@ -167,8 +165,8 @@ where
     }
 
     fn downgrade(&mut self) -> Node4<K, V> {
-        let mut keys:[AtomicU8; 256] = unsafe { mem::uninitialized() };
-        let mut children : mem::ManuallyDrop<[ArtNode<K, V>; 48]>= unsafe { mem::uninitialized() };
+        let mut keys: [AtomicU8; 256] = unsafe { mem::uninitialized() };
+        let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 48]> = unsafe { mem::uninitialized() };
         let mut new_children_index = 0;
         for index in 0..15 {
             match self.children.get(index as usize).unwrap() {

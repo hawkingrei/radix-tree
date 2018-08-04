@@ -6,9 +6,9 @@ use node16::Node16;
 use node256::Node256;
 use std::cmp::PartialEq;
 use std::marker::PhantomData;
-use std::sync::atomic::{AtomicU8, Ordering};
-use std::{mem,ptr};
 use std::mem::ManuallyDrop;
+use std::sync::atomic::{AtomicU8, Ordering};
+use std::{mem, ptr};
 
 pub struct Node48<K, T>
 where
@@ -29,7 +29,7 @@ where
     fn new() -> Self {
         Node48 {
             header: NodeHeader::new(),
-            keys:  unsafe { make_array!(256, AtomicU8::new(0)) },
+            keys: unsafe { make_array!(256, AtomicU8::new(0)) },
             children: unsafe { ManuallyDrop::new(make_array!(48, ArtNode::Empty)) },
             marker: Default::default(),
         }
@@ -135,7 +135,7 @@ where
         let mut keys: Vec<u8> = Vec::with_capacity(16);
         let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
         let mut new_children_index = 0;
-        let mut k : mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
+        let mut k: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
         for index in 0..255 {
             let cindex = self
                 .keys
@@ -151,10 +151,7 @@ where
             }
         }
         unsafe {
-            ptr::copy_nonoverlapping(
-                keys.as_mut_ptr(),
-                k.as_mut_ptr(),
-                16);
+            ptr::copy_nonoverlapping(keys.as_mut_ptr(), k.as_mut_ptr(), 16);
         }
 
         return Node16 {
