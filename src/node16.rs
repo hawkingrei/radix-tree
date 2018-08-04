@@ -132,10 +132,6 @@ where
         return false;
     }
 
-    fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner48(Box::new(Node48::new())));
-    }
-
     fn has_child(&self, byte: u8) -> bool {
         match self.children[byte as usize] {
             ArtNode::Empty => false,
@@ -171,7 +167,7 @@ where
         };
     }
 
-    fn downgrade(&mut self) -> Node4<K, V> {
+    fn shrink(&mut self) -> Node4<K, V> {
         let mut keys: [AtomicU8; 256] = unsafe { mem::uninitialized() };
         let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 48]> = unsafe { mem::uninitialized() };
         let mut new_children_index = 0;

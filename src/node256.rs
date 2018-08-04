@@ -87,10 +87,6 @@ where
         return false;
     }
 
-    fn grow(&self) -> Option<ArtNode<K, V>> {
-        return None;
-    }
-
     fn has_child(&self, byte: u8) -> bool {
         match self.children[byte as usize] {
             ArtNode::Empty => false,
@@ -105,7 +101,7 @@ where
     K: Default + PartialEq + Digital,
     V: 'static + Send + Sync,
 {
-    fn downgrade(&mut self) -> Node48<K, V> {
+    fn shrink(&mut self) -> Node48<K, V> {
         let mut keys = unsafe { make_array!(256, AtomicU8::new(0)) };
         let mut children = unsafe { ManuallyDrop::new(make_array!(48, ArtNode::Empty)) };
         let mut new_children_index = 0;

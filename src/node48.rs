@@ -100,10 +100,6 @@ where
         return false;
     }
 
-    fn grow(&self) -> Option<ArtNode<K, V>> {
-        return Some(ArtNode::Inner256(Box::new(Node256::new())));
-    }
-
     fn has_child(&self, byte: u8) -> bool {
         match self.children[byte as usize] {
             ArtNode::Empty => false,
@@ -137,7 +133,7 @@ where
         };
     }
 
-    fn downgrade(&mut self) -> Node16<K, V> {
+    fn shrink(&mut self) -> Node16<K, V> {
         //let mut keys: mem::ManuallyDrop<[u8; 16]> = unsafe { mem::uninitialized() };
         let mut keys: Vec<u8> = Vec::with_capacity(16);
         let mut children: mem::ManuallyDrop<[ArtNode<K, V>; 16]> = unsafe { mem::uninitialized() };
