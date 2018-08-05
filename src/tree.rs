@@ -3,6 +3,7 @@ use node::ArtNode::Empty;
 use node::ArtNodeTrait;
 use node::{ArtKey, ArtNode};
 use std::marker::PhantomData;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 /// A simple lock-free radix tree.
 pub struct Radix<K, V>
@@ -11,7 +12,7 @@ where
     V: 'static + Send + Sync,
 {
     head: ArtNode<K, V>,
-    size: usize,
+    size: AtomicUsize,
     phantom: PhantomData<K>,
 }
 
@@ -23,7 +24,7 @@ where
     fn default() -> Self {
         Radix {
             head: ArtNode::Empty,
-            size: 0,
+            size: AtomicUsize::new(0),
             phantom: Default::default(),
         }
     }
@@ -37,7 +38,7 @@ where
     fn new(level: usize) -> Self {
         Radix {
             head: ArtNode::Empty,
-            size: 0,
+            size: AtomicUsize::new(0),
             phantom: Default::default(),
         }
     }
@@ -69,6 +70,6 @@ where
 
     fn insert(&mut self, key: K, value: T) {
         Self::insert_rec(&mut ArtNode::Empty, &mut self.head, 0, key, value);
-        self.size += 1;
+        self.size.fetch_add(1, Ordering::SeqCst);
     }
 }
