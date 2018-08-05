@@ -42,6 +42,17 @@ where
         }
     }
 
+    fn insert_rec(root: &mut ArtNode<K, T>, depth: usize, key: K, value: T) {
+        match root {
+            ArtNode::Empty => print!("1"),
+            ArtNode::Inner4(ptr) => print!("1"),
+            ArtNode::Inner16(ptr) => print!("1"),
+            ArtNode::Inner48(ptr) => print!("1"),
+            ArtNode::Inner256(ptr) => print!("1"),
+            ArtNode::Value(ptr) => print!("1"),
+        }
+    }
+
     fn insert(mut self, key: u64, value: T) {
         let mut parentKey: u8 = 0;
         let mut nodeKey: u8 = 0;
@@ -51,9 +62,8 @@ where
         {
             unsafe {
                 let mut node: Box<ArtNode<K, T>> = Box::new(ArtNode::Empty);
-                let mut nextNode: Box<ArtNode<K, T>> = Box::new(self.head);               
-                loop {
-                }
+                let mut nextNode: Box<ArtNode<K, T>> = Box::new(self.head);
+                loop {}
             }
         }
     }

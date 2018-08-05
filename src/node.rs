@@ -190,7 +190,7 @@ where
     fn change(&mut self, key: u8, val: ArtNode<K, V>) -> bool;
 
     fn has_child(&self, byte: u8) -> bool;
-    
+
     //fn grow_and_add(self, leaf: ArtNode<K, V>, byte: u8) -> ArtNode<K, V>;
 
     //fn shrink(self) -> ArtNode<K, V>;
