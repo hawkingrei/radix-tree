@@ -52,18 +52,18 @@ where
     ) {
         match root {
             ArtNode::Empty => print!("1"),
-            ArtNode::Inner4(ptr) => {
+            ArtNode::Inner4(ptr) => loop {
                 ptr.header.read_lock_or_restart();
-            }
-            ArtNode::Inner16(ptr) => {
+            },
+            ArtNode::Inner16(ptr) => loop {
                 ptr.header.read_lock_or_restart();
-            }
-            ArtNode::Inner48(ptr) => {
+            },
+            ArtNode::Inner48(ptr) => loop {
                 ptr.header.read_lock_or_restart();
-            }
-            ArtNode::Inner256(ptr) => {
+            },
+            ArtNode::Inner256(ptr) => loop {
                 ptr.header.read_lock_or_restart();
-            }
+            },
             ArtNode::Value(ptr) => print!("1"),
         }
     }
