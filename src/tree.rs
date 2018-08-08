@@ -5,7 +5,6 @@ use node::{ArtKey, ArtNode};
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-/// A simple lock-free radix tree.
 pub struct Radix<K, V>
 where
     K: Default + PartialEq + Digital + ArtKey,
