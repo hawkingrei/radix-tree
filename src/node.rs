@@ -141,12 +141,12 @@ impl NodeHeader {
         is_locked(&self.version)
     }
 
-    pub fn read_lock_or_restart(&self) -> Result<usize, bool> {
+    pub fn read_lock_or_restart(&self) -> Result<usize, ()> {
         if is_locked(&self.version) {
-            return Err(true);
+            return Err(());
         }
         if is_obsolete(&self.version) {
-            return Err(false);
+            return Err(());
         }
         let ver = self.version.load(Ordering::SeqCst);
         return Ok(ver);
@@ -208,7 +208,7 @@ where
         level: usize,
         parent: ArtNode<K, V>,
         version_parent: usize,
-    ) -> Result<&mut ArtNode<K, V>, bool>;
+    ) -> Result<&mut ArtNode<K, V>, ()>;
 
     fn insertAndUnlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool);
 

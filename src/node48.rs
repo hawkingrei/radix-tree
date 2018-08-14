@@ -48,7 +48,7 @@ where
         level: usize,
         parent: ArtNode<K, V>,
         version_parent: usize,
-    ) -> Result<&mut ArtNode<K, V>, bool> {
+    ) -> Result<&mut ArtNode<K, V>, ()> {
         let mut version = 0;
         loop {
             match self.header.read_lock_or_restart() {
@@ -56,8 +56,7 @@ where
                     version = ver;
                     break;
                 }
-                Err(true) => continue,
-                Err(false) => return Err((false)),
+                Err(_) => return Err(()),
             }
         }
         let key = if self.header.get_partial_len() == 0 {
@@ -70,25 +69,24 @@ where
             Some(index) => {
                 let id = index.load(Ordering::Relaxed);
                 if id == 0 {
-                    return Err(false);
+                    return Err(());
                 }
                 let next_node = self.children.get_mut(id as usize);
                 loop {
                     match self.header.read_lock_or_restart() {
                         Ok(ver) => if version == ver {
                             match next_node {
-                                None => return Err(true),
+                                None => return Err(()),
                                 Some(mut nd) => return Ok(nd),
                             }
                         } else {
-                            return Err(true);
+                            return Err(());
                         },
-                        Err(true) => continue,
-                        Err(false) => return Err(false),
+                        Err(_) => return Err(()),
                     }
                 }
             }
-            None => return Err(false),
+            None => return Err(()),
         }
     }
 
