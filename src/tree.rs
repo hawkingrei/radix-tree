@@ -48,12 +48,12 @@ where
         depth: usize,
         key: K,
         value: T,
-    ) {
+    ) -> Result<(), ()> {
         match root {
             ArtNode::Empty => print!("1"),
             ArtNode::Inner4(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
-                    Err(_) => return,
+                    Err(_) => return Err(()),
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {};
@@ -72,6 +72,7 @@ where
             },
             ArtNode::Value(ptr) => print!("1"),
         }
+        return Err(());
     }
 
     fn insert(&mut self, key: K, value: T) {
