@@ -53,15 +53,19 @@ where
             ArtNode::Empty => print!("1"),
             ArtNode::Inner4(ptr) => loop {
                 ptr.header.read_lock_or_restart();
+                if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner16(ptr) => loop {
                 ptr.header.read_lock_or_restart();
+                if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner48(ptr) => loop {
                 ptr.header.read_lock_or_restart();
+                if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner256(ptr) => loop {
                 ptr.header.read_lock_or_restart();
+                if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Value(ptr) => print!("1"),
         }
