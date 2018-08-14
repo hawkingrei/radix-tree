@@ -52,7 +52,10 @@ where
         match root {
             ArtNode::Empty => print!("1"),
             ArtNode::Inner4(ptr) => loop {
-                ptr.header.read_lock_or_restart();
+                let version = match ptr.header.read_lock_or_restart() {
+                    Err(_) => return,
+                    Ok(version) => version,
+                };
                 if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner16(ptr) => loop {
