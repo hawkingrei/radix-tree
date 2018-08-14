@@ -55,13 +55,10 @@ where
         parent: ArtNode<K, V>,
         version_parent: usize,
     ) -> Result<&mut ArtNode<K, V>, ()> {
-        let mut version = 0;
-        loop {
-            match self.header.read_lock_or_restart() {
-                Ok(ver) => version = ver,
-                Err(_) => return Err(()),
-            }
-        }
+        let mut version = match self.header.read_lock_or_restart() {
+            Ok(ver) => ver,
+            Err(_) => return Err(()),
+        };
         let key = if self.header.get_partial_len() == 0 {
             byte.to_le().to_bytes()[level]
         } else {
@@ -104,18 +101,16 @@ where
         match result {
             Some(index) => {
                 let next_node = self.children.get_mut(index as usize);
-                loop {
-                    match self.header.read_lock_or_restart() {
-                        Ok(ver) => if version == ver {
-                            match next_node {
-                                None => return Err(()),
-                                Some(mut nd) => return Ok(nd),
-                            }
-                        } else {
-                            return Err(());
-                        },
-                        Err(()) => return Err(()),
-                    }
+                match self.header.read_lock_or_restart() {
+                    Ok(ver) => if version == ver {
+                        match next_node {
+                            None => return Err(()),
+                            Some(mut nd) => return Ok(nd),
+                        }
+                    } else {
+                        return Err(());
+                    },
+                    Err(()) => return Err(()),
                 }
             }
             None => return Err(()),
