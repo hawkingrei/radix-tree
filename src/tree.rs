@@ -59,15 +59,24 @@ where
                 if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner16(ptr) => loop {
-                ptr.header.read_lock_or_restart();
+                let version = match ptr.header.read_lock_or_restart() {
+                    Err(_) => return Err(()),
+                    Ok(version) => version,
+                };
                 if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner48(ptr) => loop {
-                ptr.header.read_lock_or_restart();
+                let version = match ptr.header.read_lock_or_restart() {
+                    Err(_) => return Err(()),
+                    Ok(version) => version,
+                };
                 if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Inner256(ptr) => loop {
-                ptr.header.read_lock_or_restart();
+                let version = match ptr.header.read_lock_or_restart() {
+                    Err(_) => return Err(()),
+                    Ok(version) => version,
+                };
                 if !matches!(parent, ArtNode::Empty) {};
             },
             ArtNode::Value(ptr) => print!("1"),
