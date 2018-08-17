@@ -51,14 +51,6 @@ where
         key: K,
         value: T,
     ) -> Result<(), ()> {
-        let parentHeader = match parent {
-            ArtNode::Empty => return Err(()),
-            ArtNode::Inner4(ptr) => ptr.get_header(),
-            ArtNode::Inner16(ptr) => ptr.get_header(),
-            ArtNode::Inner48(ptr) => ptr.get_header(),
-            ArtNode::Inner256(ptr) => ptr.get_header(),
-            ArtNode::Value(_) => return Err(()),
-        };
         match root {
             ArtNode::Empty => print!("1"),
             ArtNode::Inner4(ptr) => loop {
@@ -67,7 +59,7 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    NodeHeader::read_unlock_or_restart(parentHeader, parentVersion);
+                    //NodeHeader::read_unlock_or_restart(parent.get_version(), parentVersion);
                 };
             },
             ArtNode::Inner16(ptr) => loop {

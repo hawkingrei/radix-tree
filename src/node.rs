@@ -121,8 +121,8 @@ impl NodeHeader {
         return false;
     }
 
-    pub fn read_unlock_or_restart(header: NodeHeader, version: usize) -> bool {
-        if header.read_version() == version {
+    pub fn read_unlock_or_restart(header: usize, version: usize) -> bool {
+        if header == version {
             return false;
         }
         return true;
@@ -184,7 +184,7 @@ where
 
     //fn clean_child(&mut self, byte: u8) -> bool;
 
-    fn get_header(&self) -> NodeHeader;
+    fn get_version(&self) -> usize;
 
     #[inline]
     fn is_full(&self) -> bool;

@@ -35,8 +35,8 @@ where
         }
     }
 
-    fn get_header(&self) -> NodeHeader {
-        self.header
+    fn get_version(&self) -> usize {
+        self.header.read_version()
     }
 
     fn add_child(&mut self, node: ArtNode<K, V>, byte: u8) {}
