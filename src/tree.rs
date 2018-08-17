@@ -59,7 +59,9 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    read_unlock_or_restart!(parent, parentVersion);
+                    if read_unlock_or_restart!(parent, parentVersion) {
+                        return Err(());
+                    }
                 };
             },
             ArtNode::Inner16(ptr) => loop {
@@ -67,21 +69,33 @@ where
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {};
+                if !matches!(parent, ArtNode::Empty) {
+                    if read_unlock_or_restart!(parent, parentVersion) {
+                        return Err(());
+                    }
+                };
             },
             ArtNode::Inner48(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {};
+                if !matches!(parent, ArtNode::Empty) {
+                    if read_unlock_or_restart!(parent, parentVersion) {
+                        return Err(());
+                    }
+                };
             },
             ArtNode::Inner256(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {};
+                if !matches!(parent, ArtNode::Empty) {
+                    if read_unlock_or_restart!(parent, parentVersion) {
+                        return Err(());
+                    }
+                };
             },
             ArtNode::Value(ptr) => print!("1"),
         }
