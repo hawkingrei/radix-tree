@@ -184,6 +184,8 @@ where
 
     //fn clean_child(&mut self, byte: u8) -> bool;
 
+    fn get_header(&self) -> NodeHeader;
+
     #[inline]
     fn is_full(&self) -> bool;
 

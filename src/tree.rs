@@ -1,6 +1,7 @@
 use internal::Digital;
 use node::ArtNode::Empty;
 use node::ArtNodeTrait;
+use node::NodeHeader;
 use node::{ArtKey, ArtNode};
 use std::marker::PhantomData;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -43,12 +44,21 @@ where
     }
 
     fn insert_rec(
-        parent: &mut ArtNode<K, T>,
+        parent: &ArtNode<K, T>,
         root: &mut ArtNode<K, T>,
         depth: usize,
+        parentVersion: usize,
         key: K,
         value: T,
     ) -> Result<(), ()> {
+        let parentHeader = match parent {
+            ArtNode::Empty => return Err(()),
+            ArtNode::Inner4(ptr) => ptr.get_header(),
+            ArtNode::Inner16(ptr) => ptr.get_header(),
+            ArtNode::Inner48(ptr) => ptr.get_header(),
+            ArtNode::Inner256(ptr) => ptr.get_header(),
+            ArtNode::Value(_) => return Err(()),
+        };
         match root {
             ArtNode::Empty => print!("1"),
             ArtNode::Inner4(ptr) => loop {
@@ -56,7 +66,9 @@ where
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {};
+                if !matches!(parent, ArtNode::Empty) {
+                    NodeHeader::read_unlock_or_restart(parentHeader, parentVersion);
+                };
             },
             ArtNode::Inner16(ptr) => loop {
                 ptr.header.read_lock_or_restart();
@@ -76,7 +88,7 @@ where
     }
 
     fn insert(&mut self, key: K, value: T) {
-        Self::insert_rec(&mut ArtNode::Empty, &mut self.head, 0, key, value);
+        Self::insert_rec(&ArtNode::Empty, &mut self.head, 0, 0, key, value);
         self.size.fetch_add(1, Ordering::SeqCst);
     }
 }

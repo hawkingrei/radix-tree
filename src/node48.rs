@@ -35,6 +35,10 @@ where
         }
     }
 
+    fn get_header(&self) -> NodeHeader {
+        self.header
+    }
+
     fn add_child(&mut self, node: ArtNode<K, V>, byte: u8) {}
 
     fn is_full(&self) -> bool {
