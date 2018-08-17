@@ -59,7 +59,7 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    //NodeHeader::read_unlock_or_restart(parent.get_version(), parentVersion);
+                    read_unlock_or_restart!(parent, parentVersion);
                 };
             },
             ArtNode::Inner16(ptr) => loop {

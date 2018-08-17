@@ -30,6 +30,20 @@ macro_rules! make_array {
     }};
 }
 
+#[macro_export]
+macro_rules! read_unlock_or_restart {
+    ($n:ident,$m:ident) => {
+        match $n {
+            ArtNode::Empty => true,
+            ArtNode::Inner4(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
+            ArtNode::Inner16(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
+            ArtNode::Inner48(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
+            ArtNode::Inner256(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
+            ArtNode::Value(ptr) => true,
+        }
+    };
+}
+
 pub trait Digital {
     // TODO: consider providing a more efficient interface here (e.g. passing a slice directly)
     type I: Iterator<Item = u8>;
