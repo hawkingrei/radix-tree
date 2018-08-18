@@ -31,6 +31,13 @@ where
         }
     }
 
+    fn prefix_matches(&self, key: K, level: usize) -> usize {
+        if self.header.prefix_match(key, level) {
+            return level + self.header.get_partial_len();
+        }
+        return level;
+    }
+
     fn get_version(&self) -> usize {
         self.header.read_version()
     }

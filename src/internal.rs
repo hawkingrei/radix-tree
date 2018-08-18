@@ -1,3 +1,5 @@
+use std::mem;
+
 #[macro_export]
 macro_rules! rep_no_copy {
     ($t:ty; $e:expr; $n:expr) => {{
@@ -49,4 +51,6 @@ pub trait Digital {
     type I: Iterator<Item = u8>;
     const STOP_CHARACTER: Option<u8> = None;
     fn digits(&self) -> Self::I;
+
+    fn to_le_bytes(&self) -> Vec<u8>;
 }

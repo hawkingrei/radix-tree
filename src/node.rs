@@ -128,6 +128,16 @@ impl NodeHeader {
         return true;
     }
 
+    pub fn prefix_match<K: Digital>(&self, key: K, depth: usize) -> bool {
+        let k = key.to_le_bytes();
+        for i in 0..self.partial_len {
+            if *k.get(i + depth).unwrap() != self.partial[i] {
+                return false;
+            }
+        }
+        return true;
+    }
+
     pub fn compute_prefix_match<K: ArtKey>(&self, key: &K, depth: usize) -> usize {
         for i in 0..self.partial_len {
             if key.bytes()[i + depth] != self.partial[i] {
@@ -183,6 +193,8 @@ where
     fn add_child(&mut self, node: ArtNode<K, V>, byte: u8);
 
     //fn clean_child(&mut self, byte: u8) -> bool;
+
+    fn prefix_matches(&self, key: K, level: usize) -> usize;
 
     fn get_version(&self) -> usize;
 
