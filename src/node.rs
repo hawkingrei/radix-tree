@@ -171,6 +171,17 @@ impl NodeHeader {
         let ver = self.version.load(Ordering::SeqCst);
         self.version.store(ver.wrapping_add(3), Ordering::SeqCst);
     }
+
+    pub fn upgrade_to_write_lock_or_restart(&mut self, version: usize) -> Result<(), ()> {
+        if self
+            .version
+            .compare_and_swap(version, version + 2, Ordering::SeqCst)
+            == version + 2
+        {
+            return Ok(());
+        }
+        return Err(());
+    }
 }
 
 #[test]
