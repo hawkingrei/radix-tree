@@ -58,9 +58,9 @@ where
             Err(_) => return Err(()),
         };
         let key = if self.header.get_partial_len() == 0 {
-            byte.to_le().to_bytes()[level]
+            byte.to_le_bytes()[level]
         } else {
-            byte.to_le().to_bytes()[level + self.header.get_partial_len()]
+            byte.to_le_bytes()[level + self.header.get_partial_len()]
         };
         let result = self.keys.get(key as usize);
         match result {
