@@ -93,7 +93,7 @@ where
         }
     }
 
-    fn insertAndUnlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool) {
+    fn insert_and_unlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool) {
         return (Empty, false);
     }
 

@@ -47,7 +47,7 @@ where
         parent: &ArtNode<K, T>,
         root: &mut ArtNode<K, T>,
         depth: usize,
-        parentVersion: usize,
+        parent_version: usize,
         key: K,
         value: T,
     ) -> Result<(), ()> {
@@ -59,7 +59,7 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parentVersion) {
+                    if read_unlock_or_restart!(parent, parent_version) {
                         return Err(());
                     }
                 };
@@ -70,7 +70,7 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parentVersion) {
+                    if read_unlock_or_restart!(parent, parent_version) {
                         return Err(());
                     }
                 };
@@ -81,7 +81,7 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parentVersion) {
+                    if read_unlock_or_restart!(parent, parent_version) {
                         return Err(());
                     }
                 };
@@ -92,7 +92,7 @@ where
                     Ok(version) => version,
                 };
                 if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parentVersion) {
+                    if read_unlock_or_restart!(parent, parent_version) {
                         return Err(());
                     }
                 };

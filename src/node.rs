@@ -235,7 +235,7 @@ where
         version_parent: usize,
     ) -> Result<&mut ArtNode<K, V>, ()>;
 
-    fn insertAndUnlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool);
+    fn insert_and_unlock(&self, parent_node: Self, key: u8) -> (ArtNode<K, V>, bool);
 
     //#[inline]
     //fn find_child(&self, byte: u8) -> Option<&ArtNode<K, V>>;
