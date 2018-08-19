@@ -66,7 +66,7 @@ where
         parent: ArtNode<K, V>,
         version_parent: usize,
     ) -> Result<&mut ArtNode<K, V>, ()> {
-        let mut version = match self.header.read_lock_or_restart() {
+        let version = match self.header.read_lock_or_restart() {
             Ok(ver) => ver,
             Err(_) => return Err(()),
         };
@@ -75,7 +75,7 @@ where
         } else {
             byte.to_le_bytes()[level + self.header.get_partial_len()]
         };
-        let mut index = 0;
+        let index = 0;
 
         let raw_node_key = [
             *self.keys.get(0).unwrap() as i8,

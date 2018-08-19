@@ -41,7 +41,7 @@ macro_rules! read_unlock_or_restart {
             ArtNode::Inner16(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
             ArtNode::Inner48(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
             ArtNode::Inner256(ptr) => NodeHeader::read_unlock_or_restart(ptr.get_version(), $m),
-            ArtNode::Value(ptr) => true,
+            ArtNode::Value(_) => true,
         }
     };
 }

@@ -62,7 +62,7 @@ where
         parent: ArtNode<K, V>,
         version_parent: usize,
     ) -> Result<&mut ArtNode<K, V>, ()> {
-        let mut version = match self.header.read_lock_or_restart() {
+        let version = match self.header.read_lock_or_restart() {
             Ok(ver) => ver,
             Err(_) => return Err(()),
         };
@@ -143,7 +143,7 @@ where
             ptr::copy_nonoverlapping(old.as_mut_ptr(), keys.as_mut_ptr(), 4);
             ptr::copy_nonoverlapping(self.children.as_mut_ptr(), children.as_mut_ptr(), 4);
         }
-        let mut n = Node16 {
+        let n = Node16 {
             header: self.header.clone(),
             keys: keys,
             children: children,

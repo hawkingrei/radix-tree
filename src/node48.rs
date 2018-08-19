@@ -60,7 +60,7 @@ where
         parent: ArtNode<K, V>,
         version_parent: usize,
     ) -> Result<&mut ArtNode<K, V>, ()> {
-        let mut version = match self.header.read_lock_or_restart() {
+        let version = match self.header.read_lock_or_restart() {
             Ok(ver) => ver,
             Err(_) => return Err(()),
         };
