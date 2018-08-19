@@ -176,11 +176,27 @@ impl NodeHeader {
         if self
             .version
             .compare_and_swap(version, version + 2, Ordering::SeqCst)
+            != version + 2
+        {
+            return Err(());
+        }
+        return Ok(());
+    }
+
+    pub fn upgrade_to_write_lock_or_write_unlock_and_restart(
+        &mut self,
+        version: usize,
+        header: &mut NodeHeader,
+    ) -> Result<(), ()> {
+        if self
+            .version
+            .compare_and_swap(version, version + 2, Ordering::SeqCst)
             == version + 2
         {
-            return Ok(());
+            header.write_unlock();
+            return Err(());
         }
-        return Err(());
+        return Ok(());
     }
 }
 
