@@ -58,44 +58,44 @@ where
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parent_version) {
-                        return Err(());
-                    }
-                };
+                //if !matches!(parent, ArtNode::Empty) {
+                //    if read_unlock_or_restart!(parent, parent_version) {
+                //        return Err(());
+                //    }
+                //};
             },
             ArtNode::Inner16(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parent_version) {
-                        return Err(());
-                    }
-                };
+                //if !matches!(parent, ArtNode::Empty) {
+                //    if read_unlock_or_restart!(parent, parent_version) {
+                //        return Err(());
+                //    }
+                //};
             },
             ArtNode::Inner48(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parent_version) {
-                        return Err(());
-                    }
-                };
+                //if !matches!(parent, ArtNode::Empty) {
+                //    if read_unlock_or_restart!(parent, parent_version) {
+                //        return Err(());
+                //    }
+                //};
             },
             ArtNode::Inner256(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
                     Err(_) => return Err(()),
                     Ok(version) => version,
                 };
-                if !matches!(parent, ArtNode::Empty) {
-                    if read_unlock_or_restart!(parent, parent_version) {
-                        return Err(());
-                    }
-                };
+                //if !matches!(parent, ArtNode::Empty) {
+                //    if read_unlock_or_restart!(parent, parent_version) {
+                //        return Err(());
+                //    }
+                //};
             },
             ArtNode::Value(ptr) => print!("1"),
         }
