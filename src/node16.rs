@@ -45,11 +45,11 @@ where
         self.header.read_version()
     }
 
-    fn prefix_matches(&self, key: K, level: usize) -> usize {
+    fn prefix_matches(&self, key: K, level: usize) -> Result<usize, usize> {
         if self.header.prefix_match(key, level) {
-            return level + self.header.get_partial_len();
+            return Ok(level + self.header.get_partial_len());
         }
-        return level;
+        return Err(level);
     }
 
     fn add_child(&mut self, node: ArtNode<K, V>, byte: u8) {}

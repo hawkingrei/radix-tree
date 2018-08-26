@@ -221,7 +221,7 @@ where
 
     //fn clean_child(&mut self, byte: u8) -> bool;
 
-    fn prefix_matches(&self, key: K, level: usize) -> usize;
+    fn prefix_matches(&self, key: K, level: usize) -> Result<usize, usize>;
 
     fn get_version(&self) -> usize;
 

@@ -32,7 +32,7 @@ where
 
 impl<K: ArtKey, T> Radix<K, T>
 where
-    K: Default + PartialEq + Digital + ArtKey,
+    K: Default + Copy + PartialEq + Digital + ArtKey,
     T: 'static + Send + Sync,
 {
     fn new(level: usize) -> Self {
@@ -51,12 +51,17 @@ where
         key: K,
         value: T,
     ) -> Result<(), ()> {
+        let mut next_depth = depth;
         match root {
             ArtNode::Empty => print!("1"),
             ArtNode::Inner4(ptr) => loop {
                 let version = match ptr.header.read_lock_or_restart() {
                     Err(_) => return Err(()),
                     Ok(version) => version,
+                };
+                match ptr.prefix_matches(key, depth) {
+                    Ok(dep) => next_depth = dep,
+                    Err(_) => {}
                 };
                 //if !matches!(parent, ArtNode::Empty) {
                 //    if read_unlock_or_restart!(parent, parent_version) {
